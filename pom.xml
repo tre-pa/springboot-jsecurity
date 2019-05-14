@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.jus.tre_pa.jsecurity</groupId>
 	<artifactId>springboot-jsecurity</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>springboot-jsecurity</name>
 	<description>Projeto para Automatização do Keycloak via API Java</description>
 
@@ -69,6 +69,12 @@
 		</dependency>
 	</dependencies>
 
+	<distributionManagement>
+		<repository>
+			<id>releases</id>
+			<url>http://nexus.tre-pa.gov.br:8090/nexus/content/repositories/releases</url>
+		</repository>
+	</distributionManagement>
 
 
 </project>
