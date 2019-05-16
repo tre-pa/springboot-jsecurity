@@ -8,13 +8,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Configuration
-@ConfigurationProperties(prefix = "keycloak")
+@ConfigurationProperties(prefix = "kc")
 @Getter
 @Setter
 public class KeycloakProperties  {
-
+	
+	@Value("${keycloak.auth-server-url}")
 	private String authServerUrl;
 
+	@Value("${keycloak.realm}")
 	private String realm;
 
 	@Value("${keycloak.credentials.secret}")
