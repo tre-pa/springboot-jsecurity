@@ -19,7 +19,6 @@ import org.keycloak.representations.idm.authorization.ScopeRepresentation;
 import org.keycloak.representations.idm.authorization.TimePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -38,6 +37,7 @@ import br.jus.tre_pa.jsecurity.base.policy.AbstractKcRolePolicy;
 import br.jus.tre_pa.jsecurity.base.policy.AbstractKcRulePolicy;
 import br.jus.tre_pa.jsecurity.base.policy.AbstractKcTimePolicy;
 import br.jus.tre_pa.jsecurity.base.policy.AbstractKcUserPolicy;
+import br.jus.tre_pa.jsecurity.config.KeycloakProperties;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -47,11 +47,8 @@ public class KcService {
 	@Autowired
 	private Keycloak keycloak;
 
-	@Value("${keycloak.realm}")
-	private String realm;
-
-	@Value("${keycloak.resource}")
-	private String clientId;
+	@Autowired
+	private KeycloakProperties kcProperties;
 
 	/**
 	 * Lista com todos os realms.
@@ -134,24 +131,24 @@ public class KcService {
 	@EventListener(ContextRefreshedEvent.class)
 	protected void register() {
 		log.info("\n\n * Iniciando registro da aplicação no Keycloak\n");
-		if (Objects.nonNull(realms)) realms.forEach(this::register);
+		if (Objects.nonNull(this.realms)) this.realms.forEach(this::register);
 		log.info("\n\n ** Clients \n");
-		if (Objects.nonNull(clients)) clients.forEach(this::register);
+		if (Objects.nonNull(this.clients)) this.clients.forEach(this::register);
 		log.info("\n\n ** Scopes \n");
-		if (Objects.nonNull(authzScopes)) authzScopes.forEach(this::register);
+		if (Objects.nonNull(this.authzScopes)) this.authzScopes.forEach(this::register);
 		log.info("\n\n ** Resources \n");
-		if (Objects.nonNull(resources)) resources.forEach(this::register);
+		if (Objects.nonNull(this.resources)) this.resources.forEach(this::register);
 		log.info("\n\n ** Policies \n");
-		if (Objects.nonNull(rolePolicies)) rolePolicies.forEach(this::register);
-		if (Objects.nonNull(groupPolicies)) groupPolicies.forEach(this::register);
-		if (Objects.nonNull(clientPolicies)) clientPolicies.forEach(this::register);
-		if (Objects.nonNull(jsPolicies)) jsPolicies.forEach(this::register);
-		if (Objects.nonNull(rulePolicies)) rulePolicies.forEach(this::register);
-		if (Objects.nonNull(timePolicies)) timePolicies.forEach(this::register);
-		if (Objects.nonNull(userPolicies)) userPolicies.forEach(this::register);
-		if (Objects.nonNull(aggregatePolcies)) aggregatePolcies.forEach(this::register);
+		if (Objects.nonNull(this.rolePolicies)) this.rolePolicies.forEach(this::register);
+		if (Objects.nonNull(this.groupPolicies)) this.groupPolicies.forEach(this::register);
+		if (Objects.nonNull(this.clientPolicies)) this.clientPolicies.forEach(this::register);
+		if (Objects.nonNull(this.jsPolicies)) this.jsPolicies.forEach(this::register);
+		if (Objects.nonNull(this.rulePolicies)) this.rulePolicies.forEach(this::register);
+		if (Objects.nonNull(this.timePolicies)) this.timePolicies.forEach(this::register);
+		if (Objects.nonNull(this.userPolicies)) this.userPolicies.forEach(this::register);
+		if (Objects.nonNull(this.aggregatePolcies)) this.aggregatePolcies.forEach(this::register);
 		log.info("\n\n ** Permissions \n");
-		if (Objects.nonNull(permissions)) permissions.forEach(this::register);
+		if (Objects.nonNull(this.permissions)) this.permissions.forEach(this::register);
 	}
 
 	/**
@@ -160,15 +157,15 @@ public class KcService {
 	 * @param keycloakRealm
 	 */
 	public void register(AbstractKcRealm keycloakRealm) {
-		if (!hasRealm()) {
+		if (!this.hasRealm()) {
 			RealmRepresentation realmRepresentation = new RealmRepresentation();
 			keycloakRealm.configure(realmRepresentation);
 			Assert.hasText(realmRepresentation.getRealm(), "O atributo 'realm' do realm deve ser definido.");
-			keycloak.realms().create(realmRepresentation);
-			log.info("Realm '{}' criado com sucesso.", this.realm);
+			this.keycloak.realms().create(realmRepresentation);
+			log.info("Realm '{}' criado com sucesso.", this.kcProperties.getRealm());
 			return;
 		}
-		log.info("Realm '{}' já existe.", this.realm);
+		log.info("Realm '{}' já existe.", this.kcProperties.getRealm());
 	}
 
 	/**
@@ -177,7 +174,7 @@ public class KcService {
 	 * @param keycloakClient
 	 */
 	public void register(AbstractKcClient keycloakClient) {
-		if (!hasClient()) {
+		if (!this.hasClient()) {
 			ClientRepresentation representation = new ClientRepresentation();
 			keycloakClient.configure(representation);
 
@@ -185,7 +182,7 @@ public class KcService {
 			Assert.hasText(representation.getSecret(), String.format("O atributo 'secret' do client (%s) deve ser definido.", keycloakClient.getClass().getName()));
 			Assert.notEmpty(representation.getRedirectUris(), String.format("O atributo 'redirectUris' do client (%s) deve ser definido.", keycloakClient.getClass().getName()));
 
-			keycloak.realm(this.realm).clients().create(representation);
+			this.keycloak.realm(this.kcProperties.getRealm()).clients().create(representation);
 			this.deleteDefaultResource();
 			log.info("Resource 'Default Resource' removido do client ({}).", keycloakClient.getClass().getName());
 			this.deleteDefaultPolicy();
@@ -194,7 +191,7 @@ public class KcService {
 			log.info("Client '{}' registrado com sucesso.", representation.getClientId());
 			return;
 		}
-		log.info("Client '{}' já existe.", this.realm);
+		log.info("Client '{}' já existe.", this.kcProperties.getRealm());
 	}
 
 	/**
@@ -209,7 +206,7 @@ public class KcService {
 		Assert.hasText(representation.getName(), String.format("O atributo 'name' do resource (%s) deve ser definido.", keycloakResource.getClass().getName()));
 		Assert.notEmpty(representation.getScopes(), String.format("O atributo 'scopes' do resource (%s) deve ser definido.", keycloakResource.getClass().getName()));
 
-		getClient().authorization().resources().create(representation);
+		this.getClient().authorization().resources().create(representation);
 		log.info("Resource '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -336,27 +333,27 @@ public class KcService {
 	public void register(AbstractKcPermission permission) {
 		ResourcePermissionRepresentation representation = new ResourcePermissionRepresentation();
 		permission.configure(representation);
-		getClient().authorization().permissions().resource().create(representation);
+		this.getClient().authorization().permissions().resource().create(representation);
 		log.info("Permission '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private ClientResource getClient() {
 		// @formatter:off
-		return  keycloak.realm(this.realm).clients().findByClientId(this.clientId).stream()
-				.map(client-> keycloak.realm(this.realm).clients().get(client.getId()))
+		return  this.keycloak.realm(this.kcProperties.getRealm()).clients().findByClientId(this.kcProperties.getClientId()).stream()
+				.map(client-> this.keycloak.realm(this.kcProperties.getRealm()).clients().get(client.getId()))
 				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException(String.format("Erro ao encontrar client '%s'", this.clientId )));
+				.orElseThrow(() -> new IllegalArgumentException(String.format("Erro ao encontrar client '%s'", this.kcProperties.getClientId() )));
 		// @formatter:on
 	}
 
 	private boolean hasRealm() {
-		return keycloak.realms().findAll().stream().anyMatch(r -> r.getRealm().equals(this.realm));
+		return this.keycloak.realms().findAll().stream().anyMatch(r -> r.getRealm().equals(this.kcProperties.getRealm()));
 	}
 
 	private boolean hasClient() {
 		// @formatter:off
-		return  keycloak.realm(this.realm).clients().findByClientId(this.clientId).stream()
-				.map(client-> keycloak.realm(this.realm).clients().get(client.getId()))
+		return  this.keycloak.realm(this.kcProperties.getRealm()).clients().findByClientId(this.kcProperties.getClientId()).stream()
+				.map(client-> this.keycloak.realm(this.kcProperties.getRealm()).clients().get(client.getId()))
 				.findFirst()
 				.isPresent();
 		// @formatter:on
@@ -364,19 +361,19 @@ public class KcService {
 
 	private void deleteDefaultResource() {
 		// @formatter:off
-		getClient().authorization().resources().resources().stream()
+		this.getClient().authorization().resources().resources().stream()
 			.filter(p -> p.getName().equals("Default Resource"))
 			.findAny()
-			.ifPresent(p -> getClient().authorization().resources().resource(p.getId()).remove());
+			.ifPresent(p -> this.getClient().authorization().resources().resource(p.getId()).remove());
 		// @formatter:on
 	}
 
 	private void deleteDefaultPolicy() {
 		// @formatter:off
-		getClient().authorization().policies().policies().stream()
+		this.getClient().authorization().policies().policies().stream()
 			.filter(p -> p.getName().equals("Default Policy"))
 			.findAny()
-			.ifPresent(p -> getClient().authorization().policies().policy(p.getId()).remove());
+			.ifPresent(p -> this.getClient().authorization().policies().policy(p.getId()).remove());
 		// @formatter:on
 	}
 

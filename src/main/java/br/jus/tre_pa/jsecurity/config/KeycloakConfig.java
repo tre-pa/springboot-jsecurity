@@ -6,6 +6,7 @@ import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,13 +25,16 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Configuration
 public class KeycloakConfig {
 
-	@Value("${keycloak.auth-server-url}")
-	private String url;
+	@Autowired
+	private KeycloakProperties kcProperties;
+	
+//	@Value("${keycloak.auth-server-url}")
+//	private String url;
 
-	@Value("${keycloak.admuser}")
+	@Value("${keycloak.adm-user:admin}")
 	private String admuser;
 
-	@Value("${keycloak.admpass}")
+	@Value("${keycloak.adm-pass:admin}")
 	private String admpass;
 
 	@Bean
@@ -38,7 +42,7 @@ public class KeycloakConfig {
 		// @formatter:off
 		return KeycloakBuilder
 				.builder()
-				.serverUrl(this.url)
+				.serverUrl(this.kcProperties.getAuthServerUrl())
 				.realm("master")
 				.grantType(OAuth2Constants.PASSWORD)
 				.clientId("admin-cli")

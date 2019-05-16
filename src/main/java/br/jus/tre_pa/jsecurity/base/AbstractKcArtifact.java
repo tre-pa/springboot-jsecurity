@@ -1,7 +1,8 @@
 package br.jus.tre_pa.jsecurity.base;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import br.jus.tre_pa.jsecurity.config.KeycloakProperties;
 import lombok.Getter;
 
 /**
@@ -13,15 +14,18 @@ import lombok.Getter;
  */
 @Getter
 public abstract class AbstractKcArtifact<T> {
+	
+	@Autowired
+	private KeycloakProperties kcProperties;
 
-	@Value("${keycloak.realm}")
-	private String realm;
-
-	@Value("${keycloak.resource}")
-	private String clientId;
-
-	@Value("${keycloak.credentials.secret}")
-	private String clientSecret;
+//	@Value("${keycloak.realm}")
+//	private String realm;
+//
+//	@Value("${keycloak.resource}")
+//	private String clientId;
+//
+//	@Value("${keycloak.credentials.secret}")
+//	private String clientSecret;
 
 	public abstract void configure(T representation);
 
