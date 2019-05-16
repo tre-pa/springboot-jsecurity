@@ -17,9 +17,9 @@ public class KeycloakProperties {
 
 	private String realm;
 
-	@Value("credentials.secret")
+	@Value("${keycloak.credentials.secret}")
 	private String secret;
 
-	@Value("resource")
+	@Value("${keycloak.resource}")
 	private String clientId;
 }
