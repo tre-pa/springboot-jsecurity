@@ -11,7 +11,7 @@ import lombok.Setter;
 @ConfigurationProperties(prefix = "keycloak")
 @Getter
 @Setter
-public class KeycloakProperties {
+public class KeycloakProperties  {
 
 	private String authServerUrl;
 
@@ -22,4 +22,7 @@ public class KeycloakProperties {
 
 	@Value("${keycloak.resource}")
 	private String clientId;
+	
+	private String baseUrl;
+	
 }
