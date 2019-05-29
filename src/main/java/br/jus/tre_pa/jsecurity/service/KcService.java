@@ -3,6 +3,8 @@ package br.jus.tre_pa.jsecurity.service;
 import java.util.Collection;
 import java.util.Objects;
 
+import javax.ws.rs.ProcessingException;
+
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.representations.idm.ClientRepresentation;
@@ -38,6 +40,7 @@ import br.jus.tre_pa.jsecurity.base.policy.AbstractKcRulePolicy;
 import br.jus.tre_pa.jsecurity.base.policy.AbstractKcTimePolicy;
 import br.jus.tre_pa.jsecurity.base.policy.AbstractKcUserPolicy;
 import br.jus.tre_pa.jsecurity.config.KeycloakProperties;
+import br.jus.tre_pa.jsecurity.exception.JSecurityException;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -130,25 +133,29 @@ public class KcService {
 
 	@EventListener(ContextRefreshedEvent.class)
 	protected void register() {
-		log.info("\n\n * Iniciando registro da aplicação no Keycloak\n");
-		if (Objects.nonNull(this.realms)) this.realms.forEach(this::register);
-		log.info("\n\n ** Clients \n");
-		if (Objects.nonNull(this.clients)) this.clients.forEach(this::register);
-		log.info("\n\n ** Scopes \n");
-		if (Objects.nonNull(this.authzScopes)) this.authzScopes.forEach(this::register);
-		log.info("\n\n ** Resources \n");
-		if (Objects.nonNull(this.resources)) this.resources.forEach(this::register);
-		log.info("\n\n ** Policies \n");
-		if (Objects.nonNull(this.rolePolicies)) this.rolePolicies.forEach(this::register);
-		if (Objects.nonNull(this.groupPolicies)) this.groupPolicies.forEach(this::register);
-		if (Objects.nonNull(this.clientPolicies)) this.clientPolicies.forEach(this::register);
-		if (Objects.nonNull(this.jsPolicies)) this.jsPolicies.forEach(this::register);
-		if (Objects.nonNull(this.rulePolicies)) this.rulePolicies.forEach(this::register);
-		if (Objects.nonNull(this.timePolicies)) this.timePolicies.forEach(this::register);
-		if (Objects.nonNull(this.userPolicies)) this.userPolicies.forEach(this::register);
-		if (Objects.nonNull(this.aggregatePolcies)) this.aggregatePolcies.forEach(this::register);
-		log.info("\n\n ** Permissions \n");
-		if (Objects.nonNull(this.permissions)) this.permissions.forEach(this::register);
+		try {
+			log.info("\n\n * Iniciando registro da aplicação no Keycloak\n");
+			if (Objects.nonNull(this.realms)) this.realms.forEach(this::register);
+			log.info("\n\n ** Clients \n");
+			if (Objects.nonNull(this.clients)) this.clients.forEach(this::register);
+			log.info("\n\n ** Scopes \n");
+			if (Objects.nonNull(this.authzScopes)) this.authzScopes.forEach(this::register);
+			log.info("\n\n ** Resources \n");
+			if (Objects.nonNull(this.resources)) this.resources.forEach(this::register);
+			log.info("\n\n ** Policies \n");
+			if (Objects.nonNull(this.rolePolicies)) this.rolePolicies.forEach(this::register);
+			if (Objects.nonNull(this.groupPolicies)) this.groupPolicies.forEach(this::register);
+			if (Objects.nonNull(this.clientPolicies)) this.clientPolicies.forEach(this::register);
+			if (Objects.nonNull(this.jsPolicies)) this.jsPolicies.forEach(this::register);
+			if (Objects.nonNull(this.rulePolicies)) this.rulePolicies.forEach(this::register);
+			if (Objects.nonNull(this.timePolicies)) this.timePolicies.forEach(this::register);
+			if (Objects.nonNull(this.userPolicies)) this.userPolicies.forEach(this::register);
+			if (Objects.nonNull(this.aggregatePolcies)) this.aggregatePolcies.forEach(this::register);
+			log.info("\n\n ** Permissions \n");
+			if (Objects.nonNull(this.permissions)) this.permissions.forEach(this::register);
+		} catch (ProcessingException e) {
+			throw new JSecurityException("Erro ao conectar ao Keycloak. " + e.getMessage());
+		}
 	}
 
 	/**
