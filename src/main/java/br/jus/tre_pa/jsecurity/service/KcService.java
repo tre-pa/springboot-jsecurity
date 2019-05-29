@@ -186,7 +186,6 @@ public class KcService {
 			keycloakClient.configure(representation);
 
 			Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", keycloakClient.getClass().getName()));
-			Assert.hasText(representation.getSecret(), String.format("O atributo 'secret' do client (%s) deve ser definido.", keycloakClient.getClass().getName()));
 			Assert.notEmpty(representation.getRedirectUris(), String.format("O atributo 'redirectUris' do client (%s) deve ser definido.", keycloakClient.getClass().getName()));
 
 			this.keycloak.realm(this.kcProperties.getRealm()).clients().create(representation);
