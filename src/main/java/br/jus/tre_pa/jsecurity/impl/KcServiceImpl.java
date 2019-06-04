@@ -135,122 +135,127 @@ public class KcServiceImpl implements KcService {
 	@EventListener(ContextRefreshedEvent.class)
 	protected void register() {
 		try {
-			log.info("\n\n * Iniciando registro da aplicação no Keycloak\n");
-			if (Objects.nonNull(this.realms)) this.realms.forEach(this::register);
-			log.info("\n\n ** Clients \n");
-			if (Objects.nonNull(this.clients)) this.clients.forEach(this::register);
-			log.info("\n\n ** Scopes \n");
-			if (Objects.nonNull(this.authzScopes)) this.authzScopes.forEach(this::register);
-			log.info("\n\n ** Resources \n");
-			if (Objects.nonNull(this.resources)) this.resources.forEach(this::register);
-			log.info("\n\n ** Policies \n");
-			if (Objects.nonNull(this.rolePolicies)) this.rolePolicies.forEach(this::register);
-			if (Objects.nonNull(this.groupPolicies)) this.groupPolicies.forEach(this::register);
-			if (Objects.nonNull(this.clientPolicies)) this.clientPolicies.forEach(this::register);
-			if (Objects.nonNull(this.jsPolicies)) this.jsPolicies.forEach(this::register);
-			if (Objects.nonNull(this.rulePolicies)) this.rulePolicies.forEach(this::register);
-			if (Objects.nonNull(this.timePolicies)) this.timePolicies.forEach(this::register);
-			if (Objects.nonNull(this.userPolicies)) this.userPolicies.forEach(this::register);
-			if (Objects.nonNull(this.aggregatePolcies)) this.aggregatePolcies.forEach(this::register);
-			log.info("\n\n ** Permissions \n");
-			if (Objects.nonNull(this.permissions)) this.permissions.forEach(this::register);
+			log.info("Iniciando registro da aplicação no Keycloak");
+			this.registerRealms();
+			this.registerClients();
+			this.registerAuthScopes();
+			this.registerResources();
+
+			log.info("Policies");
+			this.registerRolePolicies();
+			this.registerGroupPolicies();
+			this.registerClientPolicies();
+			this.registerJsPolicies();
+			this.registerRulePolicies();
+			this.registerTimePolicies();
+			this.registerUserPolicies();
+			this.registerAggregatePolicies();
+			log.info("Permissions");
+			this.registerPermissions();
 		} catch (ProcessingException e) {
 			throw new JSecurityException("Erro ao conectar ao Keycloak. " + e.getMessage());
 		}
 	}
 
-	/**
-	 * Método registrador do Realm.
-	 * 
-	 * @param keycloakRealm
+	/*
+	 * Registra os realms da aplicação (Classes que extendem AbstractKcRealm).
 	 */
+	private void registerRealms() {
+		if (Objects.nonNull(this.realms)) {
+			for (AbstractKcRealm kcrealm : this.realms) {
+				RealmRepresentation realmRepresentation = new RealmRepresentation();
+				kcrealm.configure(realmRepresentation);
+				this.register(realmRepresentation);
+			}
+		}
+	}
+
 	@Override
-	public void register(AbstractKcRealm keycloakRealm) {
+	public void register(RealmRepresentation representation) {
 		if (!this.hasRealm()) {
-			RealmRepresentation realmRepresentation = new RealmRepresentation();
-			keycloakRealm.configure(realmRepresentation);
-			Assert.hasText(realmRepresentation.getRealm(), "O atributo 'realm' do realm deve ser definido.");
-			this.keycloak.realms().create(realmRepresentation);
+			Assert.hasText(representation.getRealm(), "O atributo 'realm' do realm deve ser definido.");
+			this.keycloak.realms().create(representation);
 			log.info("Realm '{}' criado com sucesso.", this.kcProperties.getRealm());
 			return;
 		}
 		log.info("Realm '{}' já existe.", this.kcProperties.getRealm());
 	}
 
-	/**
-	 * Método registrador do Client.
-	 * 
-	 * @param keycloakClient
+	/*
+	 * Registra os clients da aplicação (Classes que extendem AbstractKcClient).
 	 */
+	private void registerClients() {
+		if (Objects.nonNull(this.clients)) {
+			for (AbstractKcClient kcClient : this.clients) {
+				ClientRepresentation representation = new ClientRepresentation();
+				kcClient.configure(representation);
+				this.deleteDefaultResource();
+				log.info("Resource 'Default Resource' removido do client ({}).", kcClient.getClass().getName());
+				this.deleteDefaultPolicy();
+				log.info("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
+
+			}
+		}
+	}
+
 	@Override
-	public void register(AbstractKcClient keycloakClient) {
+	public void register(ClientRepresentation representation) {
 		if (!this.hasClient()) {
-			ClientRepresentation representation = new ClientRepresentation();
-			keycloakClient.configure(representation);
-
-			Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", keycloakClient.getClass().getName()));
-			Assert.notEmpty(representation.getRedirectUris(), String.format("O atributo 'redirectUris' do client (%s) deve ser definido.", keycloakClient.getClass().getName()));
-
+			Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", representation.getClass().getName()));
+			Assert.notEmpty(representation.getRedirectUris(), String.format("O atributo 'redirectUris' do client (%s) deve ser definido.", representation.getClass().getName()));
 			this.keycloak.realm(this.kcProperties.getRealm()).clients().create(representation);
-			this.deleteDefaultResource();
-			log.info("Resource 'Default Resource' removido do client ({}).", keycloakClient.getClass().getName());
-			this.deleteDefaultPolicy();
-			log.info("Role Policy 'Default Policy' removida do client ({}).", keycloakClient.getClass().getName());
-
 			log.info("Client '{}' registrado com sucesso.", representation.getClientId());
 			return;
 		}
 		log.info("Client '{}' já existe.", this.kcProperties.getRealm());
 	}
 
-	/**
-	 * Método registrador de Resource.
-	 * 
-	 * @param keycloakResource
-	 */
-	@Override
-	public void register(AbstractKcResource keycloakResource) {
-		ResourceRepresentation representation = new ResourceRepresentation();
-		keycloakResource.configure(representation);
+	private void registerAuthScopes() {
+		log.info("Scopes");
+		if (Objects.nonNull(this.authzScopes)) {
+			for (AbstractKcAuthzScope authScope : this.authzScopes) {
+				ScopeRepresentation representation = new ScopeRepresentation();
+				authScope.configure(representation);
+				this.register(representation);
+			}
+		}
+	}
 
-		Assert.hasText(representation.getName(), String.format("O atributo 'name' do resource (%s) deve ser definido.", keycloakResource.getClass().getName()));
-		Assert.notEmpty(representation.getScopes(), String.format("O atributo 'scopes' do resource (%s) deve ser definido.", keycloakResource.getClass().getName()));
+	@Override
+	public void register(ScopeRepresentation representation) {
+		Assert.hasText(representation.getName(), String.format("O atributo 'name' do scope (%s) deve ser definido.", representation.getClass().getName()));
+		this.getClient().authorization().scopes().create(representation);
+		log.info("Scope '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerResources() {
+		log.info("Resources");
+		if (Objects.nonNull(this.resources)) {
+			for (AbstractKcResource resource : this.resources) {
+				ResourceRepresentation representation = new ResourceRepresentation();
+				resource.configure(representation);
+				this.register(representation);
+			}
+		}
+	}
+
+	@Override
+	public void register(ResourceRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' do resource deve ser definido.");
+		Assert.notEmpty(representation.getScopes(), "O atributo 'scopes' do resource deve ser definido.");
 
 		this.getClient().authorization().resources().create(representation);
 		log.info("Resource '{}' registrado com sucesso.", representation.getName());
 	}
 
-	/**
-	 * Método registrador do AuthzScope.
-	 * 
-	 * @param authScope
-	 */
-	@Override
-	public void register(AbstractKcAuthzScope authScope) {
-		ScopeRepresentation representation = new ScopeRepresentation();
-		authScope.configure(representation);
-
-		Assert.hasText(representation.getName(), String.format("O atributo 'name' do scope (%s) deve ser definido.", authScope.getClass().getName()));
-
-		this.getClient().authorization().scopes().create(representation);
-		log.info("Scope '{}' registrado com sucesso.", representation.getName());
-	}
-
-	/**
-	 * Método registrador de Aggragate Policy.
-	 * 
-	 * @param policy
-	 */
-	@Override
-	public void register(AbstractKcAggregatePolicy policy) {
-		AggregatePolicyRepresentation representation = new AggregatePolicyRepresentation();
-		policy.configure(representation);
-
-		Assert.hasText(representation.getName(), String.format("O atributo 'name' da aggregate policy (%s) deve ser definido.", policy.getClass().getName()));
-		Assert.notEmpty(representation.getPolicies(), String.format("o atributo 'policies' da agregate policy (%s) deve ser definido.", policy.getClass().getName()));
-
-		this.getClient().authorization().policies().aggregate().create(representation);
-		log.info("Aggregate Policy '{}' registrada com sucesso.", representation.getName());
+	private void registerClientPolicies() {
+		if (Objects.nonNull(this.clientPolicies)) {
+			for (AbstractKcClientPolicy policy : this.clientPolicies) {
+				ClientPolicyRepresentation representation = new ClientPolicyRepresentation();
+				policy.configure(representation);
+				this.register(representation);
+			}
+		}
 	}
 
 	/**
@@ -259,11 +264,19 @@ public class KcServiceImpl implements KcService {
 	 * @param policy
 	 */
 	@Override
-	public void register(AbstractKcClientPolicy policy) {
-		ClientPolicyRepresentation representation = new ClientPolicyRepresentation();
-		policy.configure(representation);
+	public void register(ClientPolicyRepresentation representation) {
 		this.getClient().authorization().policies().client().create(representation);
 		log.info("Client Policy '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerGroupPolicies() {
+		if (Objects.nonNull(this.groupPolicies)) {
+			for (AbstractKcGroupPolicy policy : this.groupPolicies) {
+				GroupPolicyRepresentation representation = new GroupPolicyRepresentation();
+				policy.configure(representation);
+				this.register(representation);
+			}
+		}
 	}
 
 	/**
@@ -272,11 +285,19 @@ public class KcServiceImpl implements KcService {
 	 * @param policy
 	 */
 	@Override
-	public void register(AbstractKcGroupPolicy policy) {
-		GroupPolicyRepresentation representation = new GroupPolicyRepresentation();
-		policy.configure(representation);
+	public void register(GroupPolicyRepresentation representation) {
 		this.getClient().authorization().policies().group().create(representation);
 		log.info("Group Policy '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerJsPolicies() {
+		if (Objects.nonNull(this.jsPolicies)) {
+			for (AbstractKcJsPolicy policy : this.jsPolicies) {
+				JSPolicyRepresentation representation = new JSPolicyRepresentation();
+				policy.configure(representation);
+				this.register(representation);
+			}
+		}
 	}
 
 	/**
@@ -285,11 +306,19 @@ public class KcServiceImpl implements KcService {
 	 * @param rolePolicy
 	 */
 	@Override
-	public void register(AbstractKcJsPolicy policy) {
-		JSPolicyRepresentation representation = new JSPolicyRepresentation();
-		policy.configure(representation);
+	public void register(JSPolicyRepresentation representation) {
 		this.getClient().authorization().policies().js().create(representation);
 		log.info("Js Policy '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerRolePolicies() {
+		if (Objects.nonNull(this.rolePolicies)) {
+			for (AbstractKcRolePolicy policy : this.rolePolicies) {
+				RolePolicyRepresentation representation = new RolePolicyRepresentation();
+				policy.configure(representation);
+				this.register(representation);
+			}
+		}
 	}
 
 	/**
@@ -298,11 +327,19 @@ public class KcServiceImpl implements KcService {
 	 * @param policy
 	 */
 	@Override
-	public void register(AbstractKcRolePolicy policy) {
-		RolePolicyRepresentation representation = new RolePolicyRepresentation();
-		policy.configure(representation);
+	public void register(RolePolicyRepresentation representation) {
 		this.getClient().authorization().policies().role().create(representation);
 		log.info("Role Policy '{}' registrada com sucesso.", representation.getName());
+	}
+
+	private void registerRulePolicies() {
+		if (Objects.nonNull(this.rulePolicies)) {
+			for (AbstractKcRulePolicy policy : this.rulePolicies) {
+				RulePolicyRepresentation representation = new RulePolicyRepresentation();
+				policy.configure(representation);
+				this.register(representation);
+			}
+		}
 	}
 
 	/**
@@ -311,11 +348,19 @@ public class KcServiceImpl implements KcService {
 	 * @param rolePolicy
 	 */
 	@Override
-	public void register(AbstractKcRulePolicy policy) {
-		RulePolicyRepresentation representation = new RulePolicyRepresentation();
-		policy.configure(representation);
+	public void register(RulePolicyRepresentation representation) {
 		this.getClient().authorization().policies().rule().create(representation);
 		log.info("Rule Policy '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerTimePolicies() {
+		if (Objects.nonNull(this.timePolicies)) {
+			for (AbstractKcTimePolicy policy : this.timePolicies) {
+				TimePolicyRepresentation representation = new TimePolicyRepresentation();
+				policy.configure(representation);
+				this.register(representation);
+			}
+		}
 	}
 
 	/**
@@ -324,11 +369,19 @@ public class KcServiceImpl implements KcService {
 	 * @param rolePolicy
 	 */
 	@Override
-	public void register(AbstractKcTimePolicy policy) {
-		TimePolicyRepresentation representation = new TimePolicyRepresentation();
-		policy.configure(representation);
+	public void register(TimePolicyRepresentation representation) {
 		this.getClient().authorization().policies().time().create(representation);
 		log.info("Time Policy '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerUserPolicies() {
+		if (Objects.nonNull(this.userPolicies)) {
+			for (AbstractKcUserPolicy policy : this.userPolicies) {
+				UserPolicyRepresentation representation = new UserPolicyRepresentation();
+				policy.configure(representation);
+				this.register(representation);
+			}
+		}
 	}
 
 	/**
@@ -337,11 +390,19 @@ public class KcServiceImpl implements KcService {
 	 * @param rolePolicy
 	 */
 	@Override
-	public void register(AbstractKcUserPolicy policy) {
-		UserPolicyRepresentation representation = new UserPolicyRepresentation();
-		policy.configure(representation);
+	public void register(UserPolicyRepresentation representation) {
 		this.getClient().authorization().policies().user().create(representation);
 		log.info("User Policy '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerPermissions() {
+		if (Objects.nonNull(this.permissions)) {
+			for(AbstractKcPermission permission: this.permissions) {
+				ResourcePermissionRepresentation representation = new ResourcePermissionRepresentation();
+				permission.configure(representation);
+				this.register(representation);
+			}
+		}
 	}
 
 	/**
@@ -350,11 +411,32 @@ public class KcServiceImpl implements KcService {
 	 * @param permission
 	 */
 	@Override
-	public void register(AbstractKcPermission permission) {
-		ResourcePermissionRepresentation representation = new ResourcePermissionRepresentation();
-		permission.configure(representation);
+	public void register(ResourcePermissionRepresentation representation) {
 		this.getClient().authorization().permissions().resource().create(representation);
 		log.info("Permission '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerAggregatePolicies() {
+		if (Objects.nonNull(this.aggregatePolcies)) {
+			for (AbstractKcAggregatePolicy policy : this.aggregatePolcies) {
+				AggregatePolicyRepresentation representation = new AggregatePolicyRepresentation();
+				policy.configure(representation);
+				this.register(representation);
+			}
+		}
+	}
+
+	/**
+	 * Método registrador de Aggragate Policy.
+	 * 
+	 * @param policy
+	 */
+	@Override
+	public void register(AggregatePolicyRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' da aggregate policy deve ser definido.");
+		Assert.notEmpty(representation.getPolicies(), "o atributo 'policies' da agregate policy deve ser definido.");
+		this.getClient().authorization().policies().aggregate().create(representation);
+		log.info("Aggregate Policy '{}' registrada com sucesso.", representation.getName());
 	}
 
 	private ClientResource getClient() {
