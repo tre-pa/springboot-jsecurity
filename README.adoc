@@ -1,0 +1,5 @@
+= springboot-jsecurity
+
+. Serviço de registro de artefatos no keycloak (realm, client, resource, policies e permissions);
+. Modelo de domínio de segurança;
+. API Rest para gerenciamento do keycloak via aplicação. 
