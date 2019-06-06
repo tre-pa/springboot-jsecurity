@@ -1,44 +1,64 @@
 package br.jus.tre_pa.jsecurity.service;
 
-import br.jus.tre_pa.jsecurity.base.AbstractKcAuthzScope;
-import br.jus.tre_pa.jsecurity.base.AbstractKcClient;
-import br.jus.tre_pa.jsecurity.base.AbstractKcPermission;
-import br.jus.tre_pa.jsecurity.base.AbstractKcRealm;
-import br.jus.tre_pa.jsecurity.base.AbstractKcResource;
-import br.jus.tre_pa.jsecurity.base.policy.AbstractKcAggregatePolicy;
-import br.jus.tre_pa.jsecurity.base.policy.AbstractKcClientPolicy;
-import br.jus.tre_pa.jsecurity.base.policy.AbstractKcGroupPolicy;
-import br.jus.tre_pa.jsecurity.base.policy.AbstractKcJsPolicy;
-import br.jus.tre_pa.jsecurity.base.policy.AbstractKcRolePolicy;
-import br.jus.tre_pa.jsecurity.base.policy.AbstractKcRulePolicy;
-import br.jus.tre_pa.jsecurity.base.policy.AbstractKcTimePolicy;
-import br.jus.tre_pa.jsecurity.base.policy.AbstractKcUserPolicy;
+import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.representations.idm.authorization.AggregatePolicyRepresentation;
+import org.keycloak.representations.idm.authorization.ClientPolicyRepresentation;
+import org.keycloak.representations.idm.authorization.GroupPolicyRepresentation;
+import org.keycloak.representations.idm.authorization.JSPolicyRepresentation;
+import org.keycloak.representations.idm.authorization.ResourcePermissionRepresentation;
+import org.keycloak.representations.idm.authorization.ResourceRepresentation;
+import org.keycloak.representations.idm.authorization.RolePolicyRepresentation;
+import org.keycloak.representations.idm.authorization.RulePolicyRepresentation;
+import org.keycloak.representations.idm.authorization.ScopeRepresentation;
+import org.keycloak.representations.idm.authorization.TimePolicyRepresentation;
+import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
 
 public interface KcService {
 
-	void register(AbstractKcRealm keycloakRealm);
+	/**
+	 * Método registrador de Realm.
+	 * 
+	 * @param representation RealmRepresentation
+	 */
+	void register(RealmRepresentation representation);
 
-	void register(AbstractKcClient keycloakClient);
+	/**
+	 * Método registrador do Client.
+	 * 
+	 * @param representation ClientRepresentation
+	 */
+	void register(ClientRepresentation representation);
 
-	void register(AbstractKcResource keycloakResource);
+	/**
+	 * Método registrador do AuthzScope.
+	 * 
+	 * @param authScope
+	 */
+	void register(ScopeRepresentation representation);
+	
+	/**
+	 * Método registrador de Resource.
+	 * 
+	 * @param keycloakResource
+	 */
+	void register(ResourceRepresentation representation);
 
-	void register(AbstractKcAuthzScope authScope);
+	void register(AggregatePolicyRepresentation representation);
 
-	void register(AbstractKcAggregatePolicy policy);
+	void register(ClientPolicyRepresentation representation);
 
-	void register(AbstractKcClientPolicy policy);
+	void register(GroupPolicyRepresentation representation);
 
-	void register(AbstractKcGroupPolicy policy);
+	void register(JSPolicyRepresentation representation);
 
-	void register(AbstractKcJsPolicy policy);
+	void register(RolePolicyRepresentation representation );
 
-	void register(AbstractKcRolePolicy policy);
+	void register(RulePolicyRepresentation representation);
 
-	void register(AbstractKcRulePolicy policy);
+	void register(TimePolicyRepresentation representation);
 
-	void register(AbstractKcTimePolicy policy);
+	void register(UserPolicyRepresentation representation);
 
-	void register(AbstractKcUserPolicy policy);
-
-	void register(AbstractKcPermission permission);
+	void register(ResourcePermissionRepresentation representation);
 }
