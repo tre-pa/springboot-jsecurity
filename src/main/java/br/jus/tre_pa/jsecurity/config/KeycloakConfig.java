@@ -27,9 +27,6 @@ public class KeycloakConfig {
 
 	@Autowired
 	private KeycloakProperties kcProperties;
-	
-//	@Value("${keycloak.auth-server-url}")
-//	private String url;
 
 	@Value("${keycloak.adm-user:admin}")
 	private String admuser;

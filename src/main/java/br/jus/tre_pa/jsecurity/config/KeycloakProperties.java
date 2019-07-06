@@ -8,9 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Classe de Properties com as propriedades do keycloak. Além dos das
- * propriedades padrões do keycloak (iniciadas com o prefixo 'keycloak.') é
- * definido o prefixo 'kc' para propriedades customizadas.
+ * Classe de Properties com as propriedades do keycloak. Além dos das propriedades padrões do keycloak (iniciadas com o prefixo 'keycloak.') é definido o prefixo 'kc' para
+ * propriedades customizadas.
  * 
  * @author jcruz
  *

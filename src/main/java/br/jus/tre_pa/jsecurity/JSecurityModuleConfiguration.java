@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Configuration
 @ComponentScan(basePackages = "br.jus.tre_pa.jsecurity")
-//@EnableConfigurationProperties(KeycloakProperties.class)
 @AutoConfigurationPackage
 public class JSecurityModuleConfiguration {
 

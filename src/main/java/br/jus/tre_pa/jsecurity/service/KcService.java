@@ -15,7 +15,7 @@ import org.keycloak.representations.idm.authorization.TimePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
 
 /**
- * Classe com os serviços par manipulação do Keycloak.
+ * Classe com os serviços para manipulação do Keycloak.
  * 
  * @author jcruz
  *
