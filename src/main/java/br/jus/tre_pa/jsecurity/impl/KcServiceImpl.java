@@ -190,10 +190,12 @@ public class KcServiceImpl implements KcService {
 				ClientRepresentation representation = new ClientRepresentation();
 				kcClient.configure(representation);
 				this.register(representation);
-				deleteDefaultResource();
-				log.info("Resource 'Default Resource' removido do client ({}).", kcClient.getClass().getName());
-				deleteDefaultPolicy();
-				log.info("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
+				if (Objects.nonNull(representation.getAuthorizationServicesEnabled())) {
+					deleteDefaultResource();
+					log.info("Resource 'Default Resource' removido do client ({}).", kcClient.getClass().getName());
+					deleteDefaultPolicy();
+					log.info("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
+				}
 
 			}
 		}
@@ -201,14 +203,14 @@ public class KcServiceImpl implements KcService {
 
 	@Override
 	public void register(ClientRepresentation representation) {
-		if (!hasClient()) {
-			Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", representation.getClass().getName()));
-			Assert.notEmpty(representation.getRedirectUris(), String.format("O atributo 'redirectUris' do client (%s) deve ser definido.", representation.getClass().getName()));
+		Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", representation.getClass().getName()));
+		if (!hasClient(representation.getClientId())) {
+//			Assert.notEmpty(representation.getRedirectUris(), String.format("O atributo 'redirectUris' do client (%s) deve ser definido.", representation.getClass().getName()));
 			keycloak.realm(kcProperties.getRealm()).clients().create(representation);
 			log.info("Client '{}' registrado com sucesso.", representation.getClientId());
 			return;
 		}
-		log.info("Client '{}' já existe.", kcProperties.getRealm());
+		log.info("Client '{}' já existe.", kcProperties.getClientId());
 	}
 
 	private void registerAuthScopes() {
@@ -453,9 +455,9 @@ public class KcServiceImpl implements KcService {
 		return keycloak.realms().findAll().stream().anyMatch(r -> r.getRealm().equals(kcProperties.getRealm()));
 	}
 
-	private boolean hasClient() {
+	private boolean hasClient(String clientId) {
 		// @formatter:off
-		return  keycloak.realm(kcProperties.getRealm()).clients().findByClientId(kcProperties.getClientId()).stream()
+		return  keycloak.realm(kcProperties.getRealm()).clients().findByClientId(clientId).stream()
 				.map(client-> keycloak.realm(kcProperties.getRealm()).clients().get(client.getId()))
 				.findFirst()
 				.isPresent();
