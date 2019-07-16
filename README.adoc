@@ -1,5 +1,21 @@
 = springboot-jsecurity
 
-. Serviço de registro de artefatos no keycloak (realm, client, resource, policies e permissions);
+O projeto `springboot-jsecurity` tem como objetivo:
+
+. Registro de artefatos no keycloak (realm, client, resource, policies e permissions);
 . Modelo de domínio de segurança;
 . API Rest para gerenciamento do keycloak via aplicação. 
+
+== Instalação
+
+[source, xml]
+----
+<dependency>
+	<groupId>br.jus.tre_pa.jsecurity</groupId>
+	<artifactId>springboot-jsecurity</artifactId>
+	<version>1.0.0</version>
+</dependency>
+----
+
+== Registro de artefatos
+
