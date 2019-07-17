@@ -1,8 +1,13 @@
 = springboot-jsecurity
+:toc:
+:toc-title: Índice
+:sectnums:
+:source-highlighter: coderay
 
 O projeto `springboot-jsecurity` tem como objetivo:
 
-. Registro de artefatos no keycloak (realm, client, resource, policies e permissions);
+. Fornecer a classe de contexto com informações de segurança do usuário logado.
+. Registro de artefatos no keycloak (realm, client, resource, policies e permissions) via Java;
 . Modelo de domínio de segurança;
 . API Rest para gerenciamento do keycloak via aplicação. 
 
@@ -17,5 +22,136 @@ O projeto `springboot-jsecurity` tem como objetivo:
 </dependency>
 ----
 
-== Registro de artefatos
+== Informações do contexto de segurança
+
+Para obter as informações do contexto de segurança do keycloak basta injetar o bena abaixo:
+
+[source, java]
+----
+@Autowired
+private KeycloakSecurityContext keycloakSecurityContext;
+----
+
+
+== Registro de artefatos via Java
+
+Com o projeto `springboot-jsecurity` é possível realizar o registro de artefatos do keycloak
+via Java
+
+=== Registrando um Realm
+
+[source, java]
+----
+@Component
+public class AppRealm extends AbstractKcRealm {
+
+	@Override
+	public void configure(RealmRepresentation representation) {
+		representation.setRealm(getKcProperties().getRealm());
+		representation.setDisplayName(getKcProperties().getRealm());
+		representation.setEnabled(true);
+		representation.setBruteForceProtected(true);
+	}
+
+}
+----
+
+=== Registrando um Client
+
+[source, java]
+----
+@Component
+@Order(1)
+public class BackendClient extends AbstractKcClient {
+
+	@Override
+	public void configure(ClientRepresentation representation) {
+		representation.setName(getKcProperties().getClientId());
+		representation.setClientId(getKcProperties().getClientId());
+		representation.setEnabled(true);
+		representation.setSecret(getKcProperties().getSecret());
+		representation.setBaseUrl(getKcProperties().getBaseUrl());
+		representation.setPublicClient(false);
+		representation.setServiceAccountsEnabled(true);
+		representation.setDirectAccessGrantsEnabled(true);
+		representation.setAuthorizationServicesEnabled(true);
+		representation.setDefaultRoles(new String[] { "REPORT_MNGT", "USER" });
+	}
+
+}
+----
+
+=== Registrando um Authorization Scope
+
+[source, java]
+----
+@Component
+public class GetAuthScope extends AbstractKcAuthzScope {
+
+	@Override
+	public void configure(ScopeRepresentation representation) {
+		representation.setName("GET");
+	}
+
+}
+----
+
+=== Registrando um Resource
+
+[source, java]
+----
+@Component
+public class JReportResource extends AbstractKcResource {
+
+	@Override
+	public void configure(ResourceRepresentation representation) {
+		representation.setName("JREPORT_RESOURCE");
+		representation.setUris(Sets.newHashSet("/api/jreport/*"));
+		// @formatter:off
+		representation.setScopes(Sets.newHashSet(
+				new ScopeRepresentation("GET"),
+				new ScopeRepresentation("PUT"),
+				new ScopeRepresentation("DELETE"),
+				new ScopeRepresentation("POST")));
+		// @formatter:on
+	}
+
+}
+----
+
+=== Registrando uma Policy
+
+==== Tipo Role
+
+[source, java]
+----
+@Component
+public class UserPolicy extends AbstractKcRolePolicy {
+
+	@Override
+	public void configure(RolePolicyRepresentation representation) {
+		representation.setName("USER_POLICY");
+		representation.addClientRole(getKcProperties().getClientId(), "USER", true);
+	}
+
+}
+----
+
+=== Registrando uma Permission
+
+[source, java]
+----
+@Component
+public class JReportPermission extends AbstractKcPermission {
+
+	@Override
+	public void configure(ResourcePermissionRepresentation representation) {
+		representation.setName("JREPORT_PERMISSION");
+		representation.addResource("JREPORT_RESOURCE");
+		representation.addPolicy("USER_POLICY");
+	}
+
+}
+----
+
 
