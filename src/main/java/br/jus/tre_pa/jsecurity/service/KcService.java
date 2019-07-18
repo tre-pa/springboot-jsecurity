@@ -2,6 +2,7 @@ package br.jus.tre_pa.jsecurity.service;
 
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.authorization.AggregatePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ClientPolicyRepresentation;
 import org.keycloak.representations.idm.authorization.GroupPolicyRepresentation;
@@ -112,4 +113,11 @@ public interface KcService {
 	 * @param representation {@link ResourcePermissionRepresentation}
 	 */
 	void register(ResourcePermissionRepresentation representation);
+
+	/**
+	 * Método registrador de User.
+	 * 
+	 * @param representation
+	 */
+	void register(UserRepresentation representation);
 }

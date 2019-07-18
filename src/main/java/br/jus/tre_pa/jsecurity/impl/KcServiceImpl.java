@@ -9,6 +9,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.authorization.AggregatePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ClientPolicyRepresentation;
 import org.keycloak.representations.idm.authorization.GroupPolicyRepresentation;
@@ -31,6 +32,7 @@ import br.jus.tre_pa.jsecurity.base.AbstractKcClient;
 import br.jus.tre_pa.jsecurity.base.AbstractKcPermission;
 import br.jus.tre_pa.jsecurity.base.AbstractKcRealm;
 import br.jus.tre_pa.jsecurity.base.AbstractKcResource;
+import br.jus.tre_pa.jsecurity.base.AbstractKcUser;
 import br.jus.tre_pa.jsecurity.base.policy.AbstractKcAggregatePolicy;
 import br.jus.tre_pa.jsecurity.base.policy.AbstractKcClientPolicy;
 import br.jus.tre_pa.jsecurity.base.policy.AbstractKcGroupPolicy;
@@ -132,12 +134,19 @@ public class KcServiceImpl implements KcService {
 	@Autowired(required = false)
 	private Collection<AbstractKcPermission> permissions;
 
+	/**
+	 * Lista com todos os usuários.
+	 */
+	@Autowired(required = false)
+	private Collection<AbstractKcUser> users;
+
 	@EventListener(ContextRefreshedEvent.class)
 	protected void register() {
 		try {
 			log.info("Iniciando registro da aplicação no Keycloak");
 			registerRealms();
 			registerClients();
+			registerUsers();
 			registerAuthScopes();
 			registerResources();
 
@@ -153,7 +162,7 @@ public class KcServiceImpl implements KcService {
 			log.info("Permissions");
 			registerPermissions();
 		} catch (ProcessingException e) {
-			throw new JSecurityException("Erro ao conectar ao Keycloak. " + e.getMessage());
+			throw new JSecurityException(String.format("Erro ao conectar ao Keycloak em: %s", kcProperties.getAuthServerUrl()));
 		}
 	}
 
@@ -161,6 +170,7 @@ public class KcServiceImpl implements KcService {
 	 * Registra os realms da aplicação (Classes que extendem AbstractKcRealm).
 	 */
 	private void registerRealms() {
+		log.info("* Realms ");
 		if (Objects.nonNull(realms)) {
 			for (AbstractKcRealm kcrealm : realms) {
 				RealmRepresentation realmRepresentation = new RealmRepresentation();
@@ -175,7 +185,7 @@ public class KcServiceImpl implements KcService {
 		if (!hasRealm()) {
 			Assert.hasText(representation.getRealm(), "O atributo 'realm' do realm deve ser definido.");
 			keycloak.realms().create(representation);
-			log.info("Realm '{}' criado com sucesso.", kcProperties.getRealm());
+			log.info("\t Realm '{}' criado com sucesso.", kcProperties.getRealm());
 			return;
 		}
 		log.info("Realm '{}' já existe.", kcProperties.getRealm());
@@ -185,18 +195,21 @@ public class KcServiceImpl implements KcService {
 	 * Registra os clients da aplicação (Classes que extendem AbstractKcClient).
 	 */
 	private void registerClients() {
+		log.info("* Clients ");
 		if (Objects.nonNull(clients)) {
 			for (AbstractKcClient kcClient : clients) {
 				ClientRepresentation representation = new ClientRepresentation();
 				kcClient.configure(representation);
 				this.register(representation);
+				// Verifica se o recurso de authorization está habilitado para o client.
 				if (Objects.nonNull(representation.getAuthorizationServicesEnabled())) {
+					// Remove o resource default gerado com o client.
 					deleteDefaultResource();
-					log.info("Resource 'Default Resource' removido do client ({}).", kcClient.getClass().getName());
+					log.debug("Resource 'Default Resource' removido do client ({}).", kcClient.getClass().getName());
+					// Remove a policy default gerada com o client.
 					deleteDefaultPolicy();
-					log.info("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
+					log.debug("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
 				}
-
 			}
 		}
 	}
@@ -205,16 +218,15 @@ public class KcServiceImpl implements KcService {
 	public void register(ClientRepresentation representation) {
 		Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", representation.getClass().getName()));
 		if (!hasClient(representation.getClientId())) {
-//			Assert.notEmpty(representation.getRedirectUris(), String.format("O atributo 'redirectUris' do client (%s) deve ser definido.", representation.getClass().getName()));
 			keycloak.realm(kcProperties.getRealm()).clients().create(representation);
-			log.info("Client '{}' registrado com sucesso.", representation.getClientId());
+			log.info("\t Client '{}' registrado com sucesso.", representation.getClientId());
 			return;
 		}
 		log.info("Client '{}' já existe.", kcProperties.getClientId());
 	}
 
 	private void registerAuthScopes() {
-		log.info("Scopes");
+		log.info("* Authorization Scopes");
 		if (Objects.nonNull(authzScopes)) {
 			for (AbstractKcAuthzScope authScope : authzScopes) {
 				ScopeRepresentation representation = new ScopeRepresentation();
@@ -228,11 +240,11 @@ public class KcServiceImpl implements KcService {
 	public void register(ScopeRepresentation representation) {
 		Assert.hasText(representation.getName(), String.format("O atributo 'name' do scope (%s) deve ser definido.", representation.getClass().getName()));
 		getClient().authorization().scopes().create(representation);
-		log.info("Scope '{}' registrado com sucesso.", representation.getName());
+		log.info("\t Scope '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private void registerResources() {
-		log.info("Resources");
+		log.info("* Resources");
 		if (Objects.nonNull(resources)) {
 			for (AbstractKcResource resource : resources) {
 				ResourceRepresentation representation = new ResourceRepresentation();
@@ -246,9 +258,8 @@ public class KcServiceImpl implements KcService {
 	public void register(ResourceRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' do resource deve ser definido.");
 		Assert.notEmpty(representation.getScopes(), "O atributo 'scopes' do resource deve ser definido.");
-
 		getClient().authorization().resources().create(representation);
-		log.info("Resource '{}' registrado com sucesso.", representation.getName());
+		log.info("\t Resource '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private void registerClientPolicies() {
@@ -269,7 +280,7 @@ public class KcServiceImpl implements KcService {
 	@Override
 	public void register(ClientPolicyRepresentation representation) {
 		getClient().authorization().policies().client().create(representation);
-		log.info("Client Policy '{}' registrado com sucesso.", representation.getName());
+		log.info("\t Client Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private void registerGroupPolicies() {
@@ -290,7 +301,7 @@ public class KcServiceImpl implements KcService {
 	@Override
 	public void register(GroupPolicyRepresentation representation) {
 		getClient().authorization().policies().group().create(representation);
-		log.info("Group Policy '{}' registrado com sucesso.", representation.getName());
+		log.info("\t Group Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private void registerJsPolicies() {
@@ -311,7 +322,7 @@ public class KcServiceImpl implements KcService {
 	@Override
 	public void register(JSPolicyRepresentation representation) {
 		getClient().authorization().policies().js().create(representation);
-		log.info("Js Policy '{}' registrado com sucesso.", representation.getName());
+		log.info("\t Js Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private void registerRolePolicies() {
@@ -332,7 +343,7 @@ public class KcServiceImpl implements KcService {
 	@Override
 	public void register(RolePolicyRepresentation representation) {
 		getClient().authorization().policies().role().create(representation);
-		log.info("Role Policy '{}' registrada com sucesso.", representation.getName());
+		log.info("\t Role Policy '{}' registrada com sucesso.", representation.getName());
 	}
 
 	private void registerRulePolicies() {
@@ -353,7 +364,7 @@ public class KcServiceImpl implements KcService {
 	@Override
 	public void register(RulePolicyRepresentation representation) {
 		getClient().authorization().policies().rule().create(representation);
-		log.info("Rule Policy '{}' registrado com sucesso.", representation.getName());
+		log.info("\t Rule Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private void registerTimePolicies() {
@@ -374,7 +385,7 @@ public class KcServiceImpl implements KcService {
 	@Override
 	public void register(TimePolicyRepresentation representation) {
 		getClient().authorization().policies().time().create(representation);
-		log.info("Time Policy '{}' registrado com sucesso.", representation.getName());
+		log.info("\t Time Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private void registerUserPolicies() {
@@ -395,28 +406,7 @@ public class KcServiceImpl implements KcService {
 	@Override
 	public void register(UserPolicyRepresentation representation) {
 		getClient().authorization().policies().user().create(representation);
-		log.info("User Policy '{}' registrado com sucesso.", representation.getName());
-	}
-
-	private void registerPermissions() {
-		if (Objects.nonNull(permissions)) {
-			for (AbstractKcPermission permission : permissions) {
-				ResourcePermissionRepresentation representation = new ResourcePermissionRepresentation();
-				permission.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
-	/**
-	 * Método registraro de Permission.
-	 * 
-	 * @param permission
-	 */
-	@Override
-	public void register(ResourcePermissionRepresentation representation) {
-		getClient().authorization().permissions().resource().create(representation);
-		log.info("Permission '{}' registrado com sucesso.", representation.getName());
+		log.info("\t User Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
 	private void registerAggregatePolicies() {
@@ -440,6 +430,50 @@ public class KcServiceImpl implements KcService {
 		Assert.notEmpty(representation.getPolicies(), "o atributo 'policies' da agregate policy deve ser definido.");
 		getClient().authorization().policies().aggregate().create(representation);
 		log.info("Aggregate Policy '{}' registrada com sucesso.", representation.getName());
+	}
+
+	private void registerPermissions() {
+		log.info("* Permissions ");
+		if (Objects.nonNull(permissions)) {
+			for (AbstractKcPermission permission : permissions) {
+				ResourcePermissionRepresentation representation = new ResourcePermissionRepresentation();
+				permission.configure(representation);
+				this.register(representation);
+			}
+		}
+	}
+
+	/**
+	 * Método registraro de Permission.
+	 * 
+	 * @param permission
+	 */
+	@Override
+	public void register(ResourcePermissionRepresentation representation) {
+		getClient().authorization().permissions().resource().create(representation);
+		log.info("\t Permission '{}' registrado com sucesso.", representation.getName());
+	}
+
+	private void registerUsers() {
+		log.info("* Users");
+		if (Objects.nonNull(users)) {
+			for (AbstractKcUser user : users) {
+				UserRepresentation representation = new UserRepresentation();
+				user.configure(representation);
+				this.register(representation);
+			}
+		}
+	}
+
+	/*
+	 * 
+	 */
+	@Override
+	public void register(UserRepresentation representation) {
+		Assert.hasText(representation.getUsername(), "O atributo 'username' é obrigatório.");
+		Assert.hasText(representation.getEmail(), "O atributo 'email' é obrigatório.");
+		keycloak.realm(kcProperties.getRealm()).users().create(representation);
+		log.info("\t Usuário '{}' registrado com sucesso.", representation.getUsername());
 	}
 
 	private ClientResource getClient() {
