@@ -20,7 +20,7 @@ import lombok.Setter;
 @ConfigurationProperties(prefix = "kc")
 @Getter
 @Setter
-public class KeycloakProperties {
+public class SecurityProperties {
 
 	/**
 	 * URL de conexão do keycloak.

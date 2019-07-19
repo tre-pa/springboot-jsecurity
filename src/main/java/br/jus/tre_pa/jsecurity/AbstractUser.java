@@ -8,6 +8,6 @@ import org.keycloak.representations.idm.UserRepresentation;
  * @author jcruz
  *
  */
-public abstract class AbstractKcUser extends AbstractKcArtifact<UserRepresentation> {
+public abstract class AbstractUser extends AbstractArtifact<UserRepresentation> {
 
 }

@@ -6,7 +6,7 @@ import org.keycloak.representations.idm.authorization.ResourcePermissionRepresen
 
 import com.google.common.collect.Sets;
 
-public abstract class AbstractKcPermission extends AbstractKcArtifact<ResourcePermissionRepresentation> {
+public abstract class AbstractPermission extends AbstractArtifact<ResourcePermissionRepresentation> {
 
 	protected Set<String> policies(String...policies) {
 		return Sets.newHashSet(policies);

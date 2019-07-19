@@ -8,6 +8,6 @@ import org.keycloak.representations.idm.authorization.ResourceRepresentation;
  * @author jcruz
  *
  */
-public abstract class AbstractKcResource extends AbstractKcArtifact<ResourceRepresentation> {
+public abstract class AbstractResource extends AbstractArtifact<ResourceRepresentation> {
 
 }

@@ -8,6 +8,6 @@ import org.keycloak.representations.idm.authorization.ScopeRepresentation;
  * @author jcruz
  *
  */
-public abstract class AbstractKcAuthzScope extends AbstractKcArtifact<ScopeRepresentation> {
+public abstract class AbstractAuthzScope extends AbstractArtifact<ScopeRepresentation> {
 
 }

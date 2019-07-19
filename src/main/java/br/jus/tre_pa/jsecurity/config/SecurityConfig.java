@@ -22,10 +22,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  *
  */
 @Configuration
-public class KeycloakConfig {
+public class SecurityConfig {
 
 	@Autowired
-	private KeycloakProperties kcProperties;
+	private SecurityProperties kcProperties;
 
 	@Bean
 	public Keycloak getKeycloak() {

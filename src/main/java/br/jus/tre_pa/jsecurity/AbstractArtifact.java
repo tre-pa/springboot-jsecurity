@@ -2,7 +2,7 @@ package br.jus.tre_pa.jsecurity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import br.jus.tre_pa.jsecurity.config.KeycloakProperties;
+import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 import lombok.Getter;
 
 /**
@@ -13,10 +13,10 @@ import lombok.Getter;
  * @param <T>
  */
 @Getter
-public abstract class AbstractKcArtifact<T> {
+public abstract class AbstractArtifact<T> {
 
 	@Autowired
-	private KeycloakProperties kcProperties;
+	private SecurityProperties kcProperties;
 
 	public abstract void configure(T representation);
 
