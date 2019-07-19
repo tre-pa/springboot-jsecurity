@@ -18,4 +18,5 @@ public class JSecurityModuleConfiguration {
 	private void init() {
 		log.info("JSecurityModuleConfiguration loaded.");
 	}
+
 }
