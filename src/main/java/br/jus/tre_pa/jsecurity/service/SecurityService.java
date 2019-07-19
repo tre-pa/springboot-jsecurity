@@ -1,5 +1,6 @@
 package br.jus.tre_pa.jsecurity.service;
 
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -14,6 +15,8 @@ import org.keycloak.representations.idm.authorization.RulePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ScopeRepresentation;
 import org.keycloak.representations.idm.authorization.TimePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
+
+import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 
 /**
  * Classe com os serviços para manipulação do Keycloak.
@@ -120,4 +123,11 @@ public interface SecurityService {
 	 * @param representation
 	 */
 	void register(UserRepresentation representation);
+
+	/**
+	 * Retorna o ClientResource com clientId definido pela properiedade {@link SecurityProperties#getClientId()}
+	 * 
+	 * @return
+	 */
+	ClientResource getClientResource();
 }

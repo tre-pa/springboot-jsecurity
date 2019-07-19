@@ -9,7 +9,6 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.authorization.AggregatePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ClientPolicyRepresentation;
@@ -30,7 +29,6 @@ import org.springframework.util.Assert;
 
 import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractAuthzScopeConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractClientConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractClientPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractGroupPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractJsPolicyConfiguration;
@@ -48,19 +46,13 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class KcServiceImpl implements SecurityService {
+public class SecurityServiceImpl implements SecurityService {
 
 	@Autowired
 	private Keycloak keycloak;
 
 	@Autowired
 	private SecurityProperties kcProperties;
-
-	/**
-	 * Lista com todos os clients.
-	 */
-	@Autowired
-	private Collection<AbstractClientConfiguration> clients;
 
 	/**
 	 * Lista com todos os resources.
@@ -139,7 +131,7 @@ public class KcServiceImpl implements SecurityService {
 		try {
 			log.info("Iniciando registro da aplicação no Keycloak");
 //			registerRealms();
-			registerClients();
+//			registerClients();
 			registerUsers();
 			registerAuthScopes();
 			registerResources();
@@ -185,35 +177,35 @@ public class KcServiceImpl implements SecurityService {
 		log.info("Realm '{}' já existe.", kcProperties.getRealm());
 	}
 
-	/*
-	 * Registra os clients da aplicação (Classes que extendem AbstractKcClient).
-	 */
-	private void registerClients() {
-		log.info("* Clients ");
-		if (Objects.nonNull(clients)) {
-			for (AbstractClientConfiguration kcClient : clients) {
-				ClientRepresentation representation = new ClientRepresentation();
-				kcClient.configure(representation);
-				this.register(representation);
-				// Verifica se o recurso de authorization está habilitado para o client.
-				if (Objects.nonNull(representation.getAuthorizationServicesEnabled())) {
-					// Remove o resource default gerado com o client.
-					deleteDefaultResource();
-					log.debug("Resource 'Default Resource' removido do client ({}).", kcClient.getClass().getName());
-					// Remove a policy default gerada com o client.
-					deleteDefaultPolicy();
-					log.debug("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
-				}
-				if (Objects.nonNull(kcClient.roles())) {
-					// @formatter:off
-					kcClient.roles().stream()
-						.map(role -> new RoleRepresentation(role, role, false))
-						.forEach(role -> getClient().roles().create(role));
-					// @formatter:on
-				}
-			}
-		}
-	}
+//	/*
+//	 * Registra os clients da aplicação (Classes que extendem AbstractKcClient).
+//	 */
+//	private void registerClients() {
+//		log.info("* Clients ");
+//		if (Objects.nonNull(clients)) {
+//			for (AbstractClientConfiguration kcClient : clients) {
+//				ClientRepresentation representation = new ClientRepresentation();
+//				kcClient.configure(representation);
+//				this.register(representation);
+//				// Verifica se o recurso de authorization está habilitado para o client.
+//				if (Objects.nonNull(representation.getAuthorizationServicesEnabled())) {
+//					// Remove o resource default gerado com o client.
+//					deleteDefaultResource();
+//					log.debug("Resource 'Default Resource' removido do client ({}).", kcClient.getClass().getName());
+//					// Remove a policy default gerada com o client.
+//					deleteDefaultPolicy();
+//					log.debug("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
+//				}
+//				if (Objects.nonNull(kcClient.roles())) {
+//					// @formatter:off
+//					kcClient.roles().stream()
+//						.map(role -> new RoleRepresentation(role, role, false))
+//						.forEach(role -> getClient().roles().create(role));
+//					// @formatter:on
+//				}
+//			}
+//		}
+//	}
 
 	@Override
 	public void register(ClientRepresentation representation) {
@@ -240,7 +232,7 @@ public class KcServiceImpl implements SecurityService {
 	@Override
 	public void register(ScopeRepresentation representation) {
 		Assert.hasText(representation.getName(), String.format("O atributo 'name' do scope (%s) deve ser definido.", representation.getClass().getName()));
-		getClient().authorization().scopes().create(representation);
+		getClientResource().authorization().scopes().create(representation);
 		log.info("\t Scope '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -259,7 +251,7 @@ public class KcServiceImpl implements SecurityService {
 	public void register(ResourceRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' do resource deve ser definido.");
 		Assert.notEmpty(representation.getScopes(), "O atributo 'scopes' do resource deve ser definido.");
-		getClient().authorization().resources().create(representation);
+		getClientResource().authorization().resources().create(representation);
 		log.info("\t Resource '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -280,7 +272,7 @@ public class KcServiceImpl implements SecurityService {
 	 */
 	@Override
 	public void register(ClientPolicyRepresentation representation) {
-		getClient().authorization().policies().client().create(representation);
+		getClientResource().authorization().policies().client().create(representation);
 		log.info("\t Client Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -301,7 +293,7 @@ public class KcServiceImpl implements SecurityService {
 	 */
 	@Override
 	public void register(GroupPolicyRepresentation representation) {
-		getClient().authorization().policies().group().create(representation);
+		getClientResource().authorization().policies().group().create(representation);
 		log.info("\t Group Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -322,7 +314,7 @@ public class KcServiceImpl implements SecurityService {
 	 */
 	@Override
 	public void register(JSPolicyRepresentation representation) {
-		getClient().authorization().policies().js().create(representation);
+		getClientResource().authorization().policies().js().create(representation);
 		log.info("\t Js Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -343,7 +335,7 @@ public class KcServiceImpl implements SecurityService {
 	 */
 	@Override
 	public void register(RolePolicyRepresentation representation) {
-		getClient().authorization().policies().role().create(representation);
+		getClientResource().authorization().policies().role().create(representation);
 		log.info("\t Role Policy '{}' registrada com sucesso.", representation.getName());
 	}
 
@@ -364,7 +356,7 @@ public class KcServiceImpl implements SecurityService {
 	 */
 	@Override
 	public void register(RulePolicyRepresentation representation) {
-		getClient().authorization().policies().rule().create(representation);
+		getClientResource().authorization().policies().rule().create(representation);
 		log.info("\t Rule Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -385,7 +377,7 @@ public class KcServiceImpl implements SecurityService {
 	 */
 	@Override
 	public void register(TimePolicyRepresentation representation) {
-		getClient().authorization().policies().time().create(representation);
+		getClientResource().authorization().policies().time().create(representation);
 		log.info("\t Time Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -406,7 +398,7 @@ public class KcServiceImpl implements SecurityService {
 	 */
 	@Override
 	public void register(UserPolicyRepresentation representation) {
-		getClient().authorization().policies().user().create(representation);
+		getClientResource().authorization().policies().user().create(representation);
 		log.info("\t User Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -429,7 +421,7 @@ public class KcServiceImpl implements SecurityService {
 	public void register(AggregatePolicyRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' da aggregate policy deve ser definido.");
 		Assert.notEmpty(representation.getPolicies(), "o atributo 'policies' da agregate policy deve ser definido.");
-		getClient().authorization().policies().aggregate().create(representation);
+		getClientResource().authorization().policies().aggregate().create(representation);
 		log.info("Aggregate Policy '{}' registrada com sucesso.", representation.getName());
 	}
 
@@ -451,7 +443,7 @@ public class KcServiceImpl implements SecurityService {
 	 */
 	@Override
 	public void register(ResourcePermissionRepresentation representation) {
-		getClient().authorization().permissions().resource().create(representation);
+		getClientResource().authorization().permissions().resource().create(representation);
 		log.info("\t Permission '{}' registrado com sucesso.", representation.getName());
 	}
 
@@ -477,7 +469,8 @@ public class KcServiceImpl implements SecurityService {
 		log.info("\t Usuário '{}' registrado com sucesso.", representation.getUsername());
 	}
 
-	private ClientResource getClient() {
+	@Override
+	public ClientResource getClientResource() {
 		// @formatter:off
 		return  keycloak.realm(kcProperties.getRealm()).clients().findByClientId(kcProperties.getClientId()).stream()
 				.map(client-> keycloak.realm(kcProperties.getRealm()).clients().get(client.getId()))
@@ -496,24 +489,6 @@ public class KcServiceImpl implements SecurityService {
 				.map(client-> keycloak.realm(kcProperties.getRealm()).clients().get(client.getId()))
 				.findFirst()
 				.isPresent();
-		// @formatter:on
-	}
-
-	private void deleteDefaultResource() {
-		// @formatter:off
-		getClient().authorization().resources().resources().stream()
-			.filter(p -> p.getName().equals("Default Resource"))
-			.findAny()
-			.ifPresent(p -> getClient().authorization().resources().resource(p.getId()).remove());
-		// @formatter:on
-	}
-
-	private void deleteDefaultPolicy() {
-		// @formatter:off
-		getClient().authorization().policies().policies().stream()
-			.filter(p -> p.getName().equals("Default Policy"))
-			.findAny()
-			.ifPresent(p -> getClient().authorization().policies().policy(p.getId()).remove());
 		// @formatter:on
 	}
 
