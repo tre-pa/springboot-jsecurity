@@ -21,7 +21,7 @@ import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
  * @author jcruz
  *
  */
-public interface KcService {
+public interface SecurityService {
 
 	/**
 	 * Método registrador de Realm.

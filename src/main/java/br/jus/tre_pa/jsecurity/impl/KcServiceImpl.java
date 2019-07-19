@@ -35,7 +35,6 @@ import br.jus.tre_pa.jsecurity.AbstractClientPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractGroupPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractJsPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractRealmConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractResourceConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractRolePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractRulePolicyConfiguration;
@@ -44,24 +43,18 @@ import br.jus.tre_pa.jsecurity.AbstractUserConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractUserPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 import br.jus.tre_pa.jsecurity.exception.JSecurityException;
-import br.jus.tre_pa.jsecurity.service.KcService;
+import br.jus.tre_pa.jsecurity.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class KcServiceImpl implements KcService {
+public class KcServiceImpl implements SecurityService {
 
 	@Autowired
 	private Keycloak keycloak;
 
 	@Autowired
 	private SecurityProperties kcProperties;
-
-	/**
-	 * Lista com todos os realms.
-	 */
-	@Autowired
-	private Collection<AbstractRealmConfiguration> realms;
 
 	/**
 	 * Lista com todos os clients.
@@ -145,7 +138,7 @@ public class KcServiceImpl implements KcService {
 	protected void register() {
 		try {
 			log.info("Iniciando registro da aplicação no Keycloak");
-			registerRealms();
+//			registerRealms();
 			registerClients();
 			registerUsers();
 			registerAuthScopes();
@@ -167,19 +160,19 @@ public class KcServiceImpl implements KcService {
 		}
 	}
 
-	/*
-	 * Registra os realms da aplicação (Classes que extendem AbstractKcRealm).
-	 */
-	private void registerRealms() {
-		log.info("* Realms ");
-		if (Objects.nonNull(realms)) {
-			for (AbstractRealmConfiguration kcrealm : realms) {
-				RealmRepresentation realmRepresentation = new RealmRepresentation();
-				kcrealm.configure(realmRepresentation);
-				this.register(realmRepresentation);
-			}
-		}
-	}
+//	/*
+//	 * Registra os realms da aplicação (Classes que extendem AbstractKcRealm).
+//	 */
+//	private void registerRealms() {
+//		log.info("* Realms ");
+//		if (Objects.nonNull(realms)) {
+//			for (AbstractRealmConfiguration kcrealm : realms) {
+//				RealmRepresentation realmRepresentation = new RealmRepresentation();
+//				kcrealm.configure(realmRepresentation);
+//				this.register(realmRepresentation);
+//			}
+//		}
+//	}
 
 	@Override
 	public void register(RealmRepresentation representation) {
