@@ -9,6 +9,7 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.authorization.AggregatePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ClientPolicyRepresentation;
@@ -209,6 +210,13 @@ public class KcServiceImpl implements KcService {
 					// Remove a policy default gerada com o client.
 					deleteDefaultPolicy();
 					log.debug("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
+				}
+				if (Objects.nonNull(kcClient.roles())) {
+					// @formatter:off
+					kcClient.roles().stream()
+						.map(role -> new RoleRepresentation(role, role, false))
+						.forEach(role -> getClient().roles().create(role));
+					// @formatter:on
 				}
 			}
 		}
