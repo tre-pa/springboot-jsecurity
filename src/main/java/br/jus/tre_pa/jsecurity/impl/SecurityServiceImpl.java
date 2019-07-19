@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractAuthzScopeConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractClientPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractGroupPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractJsPolicyConfiguration;
@@ -56,12 +55,6 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	@Autowired(required = false)
 	private Collection<AbstractResourceConfiguration> resources;
-
-	/**
-	 * Lista com todos authzScopes.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractAuthzScopeConfiguration> authzScopes;
 
 	/**
 	 * Lista com todos os Aggregate Policies.
@@ -124,7 +117,7 @@ public class SecurityServiceImpl implements SecurityService {
 //			registerRealms();
 //			registerClients();
 //			registerUsers();
-			registerAuthScopes();
+//			registerAuthScopes();
 			registerResources();
 
 			log.info("Policies");
@@ -192,22 +185,16 @@ public class SecurityServiceImpl implements SecurityService {
 		// @formatter:on
 	}
 
-	private void registerAuthScopes() {
-		log.info("* Authorization Scopes");
-		if (Objects.nonNull(authzScopes)) {
-			for (AbstractAuthzScopeConfiguration authScope : authzScopes) {
-				ScopeRepresentation representation = new ScopeRepresentation();
-				authScope.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
 	@Override
-	public void register(ScopeRepresentation representation) {
+	public boolean register(ScopeRepresentation representation) {
 		Assert.hasText(representation.getName(), String.format("O atributo 'name' do scope (%s) deve ser definido.", representation.getClass().getName()));
-		getClientResource().authorization().scopes().create(representation);
-		log.info("\t Scope '{}' registrado com sucesso.", representation.getName());
+		if (!hasScope(representation.getName())) {
+			getClientResource().authorization().scopes().create(representation);
+			log.info("\t Scope '{}' registrado com sucesso.", representation.getName());
+			return true;
+		}
+		log.info("\t Scope '{}' já existe.", representation.getName());
+		return false;
 	}
 
 	private void registerResources() {
@@ -462,6 +449,10 @@ public class SecurityServiceImpl implements SecurityService {
 
 	private boolean hasUser(String username) {
 		return keycloak.realm(kcProperties.getRealm()).users().search(username).isEmpty() == false;
+	}
+
+	private boolean hasScope(String scopeName) {
+		return Objects.nonNull(getClientResource().authorization().scopes().findByName(scopeName));
 	}
 
 }

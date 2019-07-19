@@ -45,7 +45,7 @@ public interface SecurityService {
 	 * 
 	 * @param authScope ScopeRepresentation {@link ScopeRepresentation}
 	 */
-	void register(ScopeRepresentation representation);
+	boolean register(ScopeRepresentation representation);
 
 	/**
 	 * Método registrador de Resource.
