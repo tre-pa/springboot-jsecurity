@@ -1,7 +1,10 @@
 package br.jus.tre_pa.jsecurity.config;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
@@ -38,6 +41,9 @@ public class SecurityConfig {
 				.clientId("admin-cli")
 				.username(kcProperties.getAdmUser())
 				.password(kcProperties.getAdmPass())
+				.resteasyClient(new ResteasyClientBuilder()
+						.connectTimeout(30, TimeUnit.SECONDS)
+						.connectionPoolSize(10).build())
 				.build();
 		// @formatter:on
 	}

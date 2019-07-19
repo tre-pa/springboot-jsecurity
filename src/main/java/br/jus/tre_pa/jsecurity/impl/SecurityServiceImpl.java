@@ -152,20 +152,6 @@ public class SecurityServiceImpl implements SecurityService {
 		}
 	}
 
-//	/*
-//	 * Registra os realms da aplicação (Classes que extendem AbstractKcRealm).
-//	 */
-//	private void registerRealms() {
-//		log.info("* Realms ");
-//		if (Objects.nonNull(realms)) {
-//			for (AbstractRealmConfiguration kcrealm : realms) {
-//				RealmRepresentation realmRepresentation = new RealmRepresentation();
-//				kcrealm.configure(realmRepresentation);
-//				this.register(realmRepresentation);
-//			}
-//		}
-//	}
-
 	@Override
 	public void register(RealmRepresentation representation) {
 		if (!hasRealm()) {
@@ -174,48 +160,43 @@ public class SecurityServiceImpl implements SecurityService {
 			log.info("\t Realm '{}' criado com sucesso.", kcProperties.getRealm());
 			return;
 		}
-		log.info("Realm '{}' já existe.", kcProperties.getRealm());
+		log.info("\t Realm '{}' já existe.", kcProperties.getRealm());
 	}
-
-//	/*
-//	 * Registra os clients da aplicação (Classes que extendem AbstractKcClient).
-//	 */
-//	private void registerClients() {
-//		log.info("* Clients ");
-//		if (Objects.nonNull(clients)) {
-//			for (AbstractClientConfiguration kcClient : clients) {
-//				ClientRepresentation representation = new ClientRepresentation();
-//				kcClient.configure(representation);
-//				this.register(representation);
-//				// Verifica se o recurso de authorization está habilitado para o client.
-//				if (Objects.nonNull(representation.getAuthorizationServicesEnabled())) {
-//					// Remove o resource default gerado com o client.
-//					deleteDefaultResource();
-//					log.debug("Resource 'Default Resource' removido do client ({}).", kcClient.getClass().getName());
-//					// Remove a policy default gerada com o client.
-//					deleteDefaultPolicy();
-//					log.debug("Role Policy 'Default Policy' removida do client ({}).", kcClient.getClass().getName());
-//				}
-//				if (Objects.nonNull(kcClient.roles())) {
-//					// @formatter:off
-//					kcClient.roles().stream()
-//						.map(role -> new RoleRepresentation(role, role, false))
-//						.forEach(role -> getClient().roles().create(role));
-//					// @formatter:on
-//				}
-//			}
-//		}
-//	}
 
 	@Override
 	public void register(ClientRepresentation representation) {
 		Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", representation.getClass().getName()));
 		if (!hasClient(representation.getClientId())) {
 			keycloak.realm(kcProperties.getRealm()).clients().create(representation);
+			// Verifica se o recurso de authorization está habilitado para o client.
+			if (Objects.nonNull(representation.getAuthorizationServicesEnabled())) {
+				// Remove o resource default gerado com o client.
+				deleteDefaultResource();
+				// Remove a policy default gerada com o client.
+				deleteDefaultPolicy();
+			}
 			log.info("\t Client '{}' registrado com sucesso.", representation.getClientId());
 			return;
 		}
 		log.info("Client '{}' já existe.", kcProperties.getClientId());
+	}
+
+	private void deleteDefaultResource() {
+		// @formatter:off
+		getClientResource().authorization().resources().resources().stream()
+			.filter(p -> p.getName().equals("Default Resource"))
+			.findAny()
+			.ifPresent(p -> getClientResource().authorization().resources().resource(p.getId()).remove());
+		// @formatter:on
+	}
+
+	private void deleteDefaultPolicy() {
+		// @formatter:off
+		getClientResource().authorization().policies().policies().stream()
+			.filter(p -> p.getName().equals("Default Policy"))
+			.findAny()
+			.ifPresent(p -> getClientResource().authorization().policies().policy(p.getId()).remove());
+		// @formatter:on
 	}
 
 	private void registerAuthScopes() {

@@ -42,5 +42,4 @@ public class RealmRegister implements JSecurityRegister {
 			}
 		}
 	}
-
 }
