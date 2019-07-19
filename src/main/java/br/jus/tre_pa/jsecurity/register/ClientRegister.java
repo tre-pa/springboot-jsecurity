@@ -7,6 +7,7 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import br.jus.tre_pa.jsecurity.AbstractClientConfiguration;
 import br.jus.tre_pa.jsecurity.JSecurityRegister;
@@ -39,13 +40,15 @@ public class ClientRegister implements JSecurityRegister {
 			for (AbstractClientConfiguration clientConf : clientsConf) {
 				ClientRepresentation representation = new ClientRepresentation();
 				clientConf.configure(representation);
-				securityService.register(representation);
-				if (Objects.nonNull(clientConf.roles())) {
+				if (securityService.register(representation)) {
+					if (Objects.nonNull(clientConf.roles())) {
 					// @formatter:off
 					clientConf.roles().stream()
+						.filter(role -> !StringUtils.isEmpty(role))
 						.map(role -> new RoleRepresentation(role, role, false))
 						.forEach(role -> securityService.getClientResource().roles().create(role));
 					// @formatter:on
+					}
 				}
 			}
 		}

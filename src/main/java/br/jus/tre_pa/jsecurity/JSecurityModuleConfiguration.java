@@ -16,7 +16,7 @@ public class JSecurityModuleConfiguration {
 
 	@PostConstruct
 	private void init() {
-		log.info("JSecurityModuleConfiguration loaded.");
+		log.info("-- JSecurityModuleConfiguration loaded --");
 	}
 
 }

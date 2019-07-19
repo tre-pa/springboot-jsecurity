@@ -43,7 +43,7 @@ public class SecurityConfig {
 				.password(kcProperties.getAdmPass())
 				.resteasyClient(new ResteasyClientBuilder()
 						.connectTimeout(30, TimeUnit.SECONDS)
-						.connectionPoolSize(10).build())
+						.connectionPoolSize(5).build())
 				.build();
 		// @formatter:on
 	}

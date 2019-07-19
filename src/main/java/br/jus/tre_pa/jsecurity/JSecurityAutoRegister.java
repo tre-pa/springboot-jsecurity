@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import br.jus.tre_pa.jsecurity.register.ClientRegister;
 import br.jus.tre_pa.jsecurity.register.RealmRegister;
+import br.jus.tre_pa.jsecurity.register.UserRegister;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Classe que realiza o registro automático (inicialização da aplicação) dos arrtefatos no Keycloak.
@@ -16,6 +18,7 @@ import br.jus.tre_pa.jsecurity.register.RealmRegister;
  *
  */
 @Component
+@Slf4j
 public class JSecurityAutoRegister {
 
 	@Autowired
@@ -23,7 +26,9 @@ public class JSecurityAutoRegister {
 
 	@EventListener(ContextRefreshedEvent.class)
 	protected void init() {
+		log.debug("Iniciando o auto-registro dos artefatos no Keycloak...");
 		applicationContext.getBean(RealmRegister.class).register();
 		applicationContext.getBean(ClientRegister.class).register();
+		applicationContext.getBean(UserRegister.class).register();
 	}
 }

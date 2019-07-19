@@ -31,14 +31,14 @@ public interface SecurityService {
 	 * 
 	 * @param representation {@link RealmRepresentation}
 	 */
-	void register(RealmRepresentation representation);
+	boolean register(RealmRepresentation representation);
 
 	/**
 	 * Método registrador do Client.
 	 * 
 	 * @param representation {@link ClientRepresentation}
 	 */
-	void register(ClientRepresentation representation);
+	boolean register(ClientRepresentation representation);
 
 	/**
 	 * Método registrador do AuthzScope.
@@ -122,7 +122,7 @@ public interface SecurityService {
 	 * 
 	 * @param representation
 	 */
-	void register(UserRepresentation representation);
+	boolean register(UserRepresentation representation);
 
 	/**
 	 * Retorna o ClientResource com clientId definido pela properiedade {@link SecurityProperties#getClientId()}

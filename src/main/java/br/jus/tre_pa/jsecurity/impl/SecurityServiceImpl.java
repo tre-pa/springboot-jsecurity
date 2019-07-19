@@ -22,8 +22,6 @@ import org.keycloak.representations.idm.authorization.ScopeRepresentation;
 import org.keycloak.representations.idm.authorization.TimePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -37,7 +35,6 @@ import br.jus.tre_pa.jsecurity.AbstractResourceConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractRolePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractRulePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractTimePolicyConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractUserConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractUserPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 import br.jus.tre_pa.jsecurity.exception.JSecurityException;
@@ -120,19 +117,13 @@ public class SecurityServiceImpl implements SecurityService {
 	@Autowired(required = false)
 	private Collection<AbstractPermissionConfiguration> permissions;
 
-	/**
-	 * Lista com todos os usuários.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractUserConfiguration> users;
-
-	@EventListener(ContextRefreshedEvent.class)
+//	@EventListener(ContextRefreshedEvent.class)
 	protected void register() {
 		try {
 			log.info("Iniciando registro da aplicação no Keycloak");
 //			registerRealms();
 //			registerClients();
-			registerUsers();
+//			registerUsers();
 			registerAuthScopes();
 			registerResources();
 
@@ -153,18 +144,19 @@ public class SecurityServiceImpl implements SecurityService {
 	}
 
 	@Override
-	public void register(RealmRepresentation representation) {
+	public boolean register(RealmRepresentation representation) {
 		if (!hasRealm()) {
 			Assert.hasText(representation.getRealm(), "O atributo 'realm' do realm deve ser definido.");
 			keycloak.realms().create(representation);
 			log.info("\t Realm '{}' criado com sucesso.", kcProperties.getRealm());
-			return;
+			return true;
 		}
 		log.info("\t Realm '{}' já existe.", kcProperties.getRealm());
+		return false;
 	}
 
 	@Override
-	public void register(ClientRepresentation representation) {
+	public boolean register(ClientRepresentation representation) {
 		Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", representation.getClass().getName()));
 		if (!hasClient(representation.getClientId())) {
 			keycloak.realm(kcProperties.getRealm()).clients().create(representation);
@@ -176,9 +168,10 @@ public class SecurityServiceImpl implements SecurityService {
 				deleteDefaultPolicy();
 			}
 			log.info("\t Client '{}' registrado com sucesso.", representation.getClientId());
-			return;
+			return true;
 		}
-		log.info("Client '{}' já existe.", kcProperties.getClientId());
+		log.info("\t Client '{}' já existe.", representation.getClientId());
+		return false;
 	}
 
 	private void deleteDefaultResource() {
@@ -428,26 +421,20 @@ public class SecurityServiceImpl implements SecurityService {
 		log.info("\t Permission '{}' registrado com sucesso.", representation.getName());
 	}
 
-	private void registerUsers() {
-		log.info("* Users");
-		if (Objects.nonNull(users)) {
-			for (AbstractUserConfiguration user : users) {
-				UserRepresentation representation = new UserRepresentation();
-				user.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
 	/*
 	 * 
 	 */
 	@Override
-	public void register(UserRepresentation representation) {
+	public boolean register(UserRepresentation representation) {
 		Assert.hasText(representation.getUsername(), "O atributo 'username' é obrigatório.");
 		Assert.hasText(representation.getEmail(), "O atributo 'email' é obrigatório.");
-		keycloak.realm(kcProperties.getRealm()).users().create(representation);
-		log.info("\t Usuário '{}' registrado com sucesso.", representation.getUsername());
+		if (!hasUser(representation.getUsername())) {
+			keycloak.realm(kcProperties.getRealm()).users().create(representation);
+			log.info("\t Usuário '{}' registrado com sucesso.", representation.getUsername());
+			return true;
+		}
+		log.info("\t Usuário '{}' já existe.", representation.getUsername());
+		return false;
 	}
 
 	@Override
@@ -471,6 +458,10 @@ public class SecurityServiceImpl implements SecurityService {
 				.findFirst()
 				.isPresent();
 		// @formatter:on
+	}
+
+	private boolean hasUser(String username) {
+		return keycloak.realm(kcProperties.getRealm()).users().search(username).isEmpty() == false;
 	}
 
 }
