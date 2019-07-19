@@ -13,7 +13,7 @@ import lombok.Getter;
  *
  */
 @Getter
-public abstract class AbstractClient extends AbstractArtifact<ClientRepresentation> {
+public abstract class AbstractClientConfiguration extends AbstractArtifactConfiguration<ClientRepresentation> {
 
 	/**
 	 * Retorna as roles que serão adcionadas ao client.

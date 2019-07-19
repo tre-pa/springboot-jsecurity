@@ -8,6 +8,6 @@ import org.keycloak.representations.idm.RealmRepresentation;
  * @author jcruz
  *
  */
-public abstract class AbstractRealm extends AbstractArtifact<RealmRepresentation> {
+public abstract class AbstractRealmConfiguration extends AbstractArtifactConfiguration<RealmRepresentation> {
 
 }

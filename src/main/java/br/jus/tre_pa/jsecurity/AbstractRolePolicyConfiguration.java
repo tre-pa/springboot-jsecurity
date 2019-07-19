@@ -15,7 +15,7 @@ import com.google.common.collect.Sets;
  * @author jcruz
  *
  */
-public abstract class AbstractRolePolicy extends AbstractArtifact<RolePolicyRepresentation> {
+public abstract class AbstractRolePolicyConfiguration extends AbstractArtifactConfiguration<RolePolicyRepresentation> {
 
 	// @formatter:off
 	protected Set<RoleDefinition> roles(String...roles) {

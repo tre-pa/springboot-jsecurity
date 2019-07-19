@@ -13,7 +13,7 @@ import lombok.Getter;
  * @param <T>
  */
 @Getter
-public abstract class AbstractArtifact<T> {
+public abstract class AbstractArtifactConfiguration<T> {
 
 	@Autowired
 	private SecurityProperties kcProperties;

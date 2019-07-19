@@ -28,20 +28,20 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import br.jus.tre_pa.jsecurity.AbstractAggregatePolicy;
-import br.jus.tre_pa.jsecurity.AbstractAuthzScope;
-import br.jus.tre_pa.jsecurity.AbstractClient;
-import br.jus.tre_pa.jsecurity.AbstractClientPolicy;
-import br.jus.tre_pa.jsecurity.AbstractGroupPolicy;
-import br.jus.tre_pa.jsecurity.AbstractJsPolicy;
-import br.jus.tre_pa.jsecurity.AbstractPermission;
-import br.jus.tre_pa.jsecurity.AbstractRealm;
-import br.jus.tre_pa.jsecurity.AbstractResource;
-import br.jus.tre_pa.jsecurity.AbstractRolePolicy;
-import br.jus.tre_pa.jsecurity.AbstractRulePolicy;
-import br.jus.tre_pa.jsecurity.AbstractTimePolicy;
-import br.jus.tre_pa.jsecurity.AbstractUser;
-import br.jus.tre_pa.jsecurity.AbstractUserPolicy;
+import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractAuthzScopeConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractClientConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractClientPolicyConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractGroupPolicyConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractJsPolicyConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractRealmConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractResourceConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractRolePolicyConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractRulePolicyConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractTimePolicyConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractUserConfiguration;
+import br.jus.tre_pa.jsecurity.AbstractUserPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 import br.jus.tre_pa.jsecurity.exception.JSecurityException;
 import br.jus.tre_pa.jsecurity.service.KcService;
@@ -61,85 +61,85 @@ public class KcServiceImpl implements KcService {
 	 * Lista com todos os realms.
 	 */
 	@Autowired
-	private Collection<AbstractRealm> realms;
+	private Collection<AbstractRealmConfiguration> realms;
 
 	/**
 	 * Lista com todos os clients.
 	 */
 	@Autowired
-	private Collection<AbstractClient> clients;
+	private Collection<AbstractClientConfiguration> clients;
 
 	/**
 	 * Lista com todos os resources.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractResource> resources;
+	private Collection<AbstractResourceConfiguration> resources;
 
 	/**
 	 * Lista com todos authzScopes.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractAuthzScope> authzScopes;
+	private Collection<AbstractAuthzScopeConfiguration> authzScopes;
 
 	/**
 	 * Lista com todos os Aggregate Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractAggregatePolicy> aggregatePolcies;
+	private Collection<AbstractAggregatePolicyConfiguration> aggregatePolcies;
 
 	/**
 	 * Lista com todos Client Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractClientPolicy> clientPolicies;
+	private Collection<AbstractClientPolicyConfiguration> clientPolicies;
 
 	/**
 	 * Lista com todos os Group Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractGroupPolicy> groupPolicies;
+	private Collection<AbstractGroupPolicyConfiguration> groupPolicies;
 
 	/**
 	 * Lista com todos os Js Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractJsPolicy> jsPolicies;
+	private Collection<AbstractJsPolicyConfiguration> jsPolicies;
 
 	/**
 	 * Lista com todos os Role Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractRolePolicy> rolePolicies;
+	private Collection<AbstractRolePolicyConfiguration> rolePolicies;
 
 	/**
 	 * Lista com todos os Rule Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractRulePolicy> rulePolicies;
+	private Collection<AbstractRulePolicyConfiguration> rulePolicies;
 
 	/**
 	 * Lista com todos os Time Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractTimePolicy> timePolicies;
+	private Collection<AbstractTimePolicyConfiguration> timePolicies;
 
 	/**
 	 * Lista com todos os User Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractUserPolicy> userPolicies;
+	private Collection<AbstractUserPolicyConfiguration> userPolicies;
 
 	/**
 	 * Lista com todas as Permissions.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractPermission> permissions;
+	private Collection<AbstractPermissionConfiguration> permissions;
 
 	/**
 	 * Lista com todos os usuários.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractUser> users;
+	private Collection<AbstractUserConfiguration> users;
 
 	@EventListener(ContextRefreshedEvent.class)
 	protected void register() {
@@ -173,7 +173,7 @@ public class KcServiceImpl implements KcService {
 	private void registerRealms() {
 		log.info("* Realms ");
 		if (Objects.nonNull(realms)) {
-			for (AbstractRealm kcrealm : realms) {
+			for (AbstractRealmConfiguration kcrealm : realms) {
 				RealmRepresentation realmRepresentation = new RealmRepresentation();
 				kcrealm.configure(realmRepresentation);
 				this.register(realmRepresentation);
@@ -198,7 +198,7 @@ public class KcServiceImpl implements KcService {
 	private void registerClients() {
 		log.info("* Clients ");
 		if (Objects.nonNull(clients)) {
-			for (AbstractClient kcClient : clients) {
+			for (AbstractClientConfiguration kcClient : clients) {
 				ClientRepresentation representation = new ClientRepresentation();
 				kcClient.configure(representation);
 				this.register(representation);
@@ -236,7 +236,7 @@ public class KcServiceImpl implements KcService {
 	private void registerAuthScopes() {
 		log.info("* Authorization Scopes");
 		if (Objects.nonNull(authzScopes)) {
-			for (AbstractAuthzScope authScope : authzScopes) {
+			for (AbstractAuthzScopeConfiguration authScope : authzScopes) {
 				ScopeRepresentation representation = new ScopeRepresentation();
 				authScope.configure(representation);
 				this.register(representation);
@@ -254,7 +254,7 @@ public class KcServiceImpl implements KcService {
 	private void registerResources() {
 		log.info("* Resources");
 		if (Objects.nonNull(resources)) {
-			for (AbstractResource resource : resources) {
+			for (AbstractResourceConfiguration resource : resources) {
 				ResourceRepresentation representation = new ResourceRepresentation();
 				resource.configure(representation);
 				this.register(representation);
@@ -272,7 +272,7 @@ public class KcServiceImpl implements KcService {
 
 	private void registerClientPolicies() {
 		if (Objects.nonNull(clientPolicies)) {
-			for (AbstractClientPolicy policy : clientPolicies) {
+			for (AbstractClientPolicyConfiguration policy : clientPolicies) {
 				ClientPolicyRepresentation representation = new ClientPolicyRepresentation();
 				policy.configure(representation);
 				this.register(representation);
@@ -293,7 +293,7 @@ public class KcServiceImpl implements KcService {
 
 	private void registerGroupPolicies() {
 		if (Objects.nonNull(groupPolicies)) {
-			for (AbstractGroupPolicy policy : groupPolicies) {
+			for (AbstractGroupPolicyConfiguration policy : groupPolicies) {
 				GroupPolicyRepresentation representation = new GroupPolicyRepresentation();
 				policy.configure(representation);
 				this.register(representation);
@@ -314,7 +314,7 @@ public class KcServiceImpl implements KcService {
 
 	private void registerJsPolicies() {
 		if (Objects.nonNull(jsPolicies)) {
-			for (AbstractJsPolicy policy : jsPolicies) {
+			for (AbstractJsPolicyConfiguration policy : jsPolicies) {
 				JSPolicyRepresentation representation = new JSPolicyRepresentation();
 				policy.configure(representation);
 				this.register(representation);
@@ -335,7 +335,7 @@ public class KcServiceImpl implements KcService {
 
 	private void registerRolePolicies() {
 		if (Objects.nonNull(rolePolicies)) {
-			for (AbstractRolePolicy policy : rolePolicies) {
+			for (AbstractRolePolicyConfiguration policy : rolePolicies) {
 				RolePolicyRepresentation representation = new RolePolicyRepresentation();
 				policy.configure(representation);
 				this.register(representation);
@@ -356,7 +356,7 @@ public class KcServiceImpl implements KcService {
 
 	private void registerRulePolicies() {
 		if (Objects.nonNull(rulePolicies)) {
-			for (AbstractRulePolicy policy : rulePolicies) {
+			for (AbstractRulePolicyConfiguration policy : rulePolicies) {
 				RulePolicyRepresentation representation = new RulePolicyRepresentation();
 				policy.configure(representation);
 				this.register(representation);
@@ -377,7 +377,7 @@ public class KcServiceImpl implements KcService {
 
 	private void registerTimePolicies() {
 		if (Objects.nonNull(timePolicies)) {
-			for (AbstractTimePolicy policy : timePolicies) {
+			for (AbstractTimePolicyConfiguration policy : timePolicies) {
 				TimePolicyRepresentation representation = new TimePolicyRepresentation();
 				policy.configure(representation);
 				this.register(representation);
@@ -398,7 +398,7 @@ public class KcServiceImpl implements KcService {
 
 	private void registerUserPolicies() {
 		if (Objects.nonNull(userPolicies)) {
-			for (AbstractUserPolicy policy : userPolicies) {
+			for (AbstractUserPolicyConfiguration policy : userPolicies) {
 				UserPolicyRepresentation representation = new UserPolicyRepresentation();
 				policy.configure(representation);
 				this.register(representation);
@@ -419,7 +419,7 @@ public class KcServiceImpl implements KcService {
 
 	private void registerAggregatePolicies() {
 		if (Objects.nonNull(aggregatePolcies)) {
-			for (AbstractAggregatePolicy policy : aggregatePolcies) {
+			for (AbstractAggregatePolicyConfiguration policy : aggregatePolcies) {
 				AggregatePolicyRepresentation representation = new AggregatePolicyRepresentation();
 				policy.configure(representation);
 				this.register(representation);
@@ -443,7 +443,7 @@ public class KcServiceImpl implements KcService {
 	private void registerPermissions() {
 		log.info("* Permissions ");
 		if (Objects.nonNull(permissions)) {
-			for (AbstractPermission permission : permissions) {
+			for (AbstractPermissionConfiguration permission : permissions) {
 				ResourcePermissionRepresentation representation = new ResourcePermissionRepresentation();
 				permission.configure(representation);
 				this.register(representation);
@@ -465,7 +465,7 @@ public class KcServiceImpl implements KcService {
 	private void registerUsers() {
 		log.info("* Users");
 		if (Objects.nonNull(users)) {
-			for (AbstractUser user : users) {
+			for (AbstractUserConfiguration user : users) {
 				UserRepresentation representation = new UserRepresentation();
 				user.configure(representation);
 				this.register(representation);
