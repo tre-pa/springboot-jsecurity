@@ -13,6 +13,7 @@ import br.jus.tre_pa.jsecurity.exception.JSecurityException;
 import br.jus.tre_pa.jsecurity.register.AuthzScopeRegister;
 import br.jus.tre_pa.jsecurity.register.ClientRegister;
 import br.jus.tre_pa.jsecurity.register.RealmRegister;
+import br.jus.tre_pa.jsecurity.register.ResourceRegister;
 import br.jus.tre_pa.jsecurity.register.UserRegister;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,6 +41,7 @@ public class JSecurityAutoRegister {
 			applicationContext.getBean(ClientRegister.class).register();
 			applicationContext.getBean(UserRegister.class).register();
 			applicationContext.getBean(AuthzScopeRegister.class).register();
+			applicationContext.getBean(ResourceRegister.class).register();
 		} catch (ProcessingException e) {
 			throw new JSecurityException(String.format("Erro ao conectar ao Keycloak em: %s", securityProperties.getAuthServerUrl()));
 		}

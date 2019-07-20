@@ -52,7 +52,7 @@ public interface SecurityService {
 	 * 
 	 * @param keycloakResource {@link ResourceRepresentation}
 	 */
-	void register(ResourceRepresentation representation);
+	boolean register(ResourceRepresentation representation);
 
 	/**
 	 * Método registrador de Policy do tipo Aggregate.

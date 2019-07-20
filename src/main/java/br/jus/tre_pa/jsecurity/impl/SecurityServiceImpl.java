@@ -3,8 +3,6 @@ package br.jus.tre_pa.jsecurity.impl;
 import java.util.Collection;
 import java.util.Objects;
 
-import javax.ws.rs.ProcessingException;
-
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.representations.idm.ClientRepresentation;
@@ -30,13 +28,11 @@ import br.jus.tre_pa.jsecurity.AbstractClientPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractGroupPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractJsPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractResourceConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractRolePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractRulePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractTimePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractUserPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
-import br.jus.tre_pa.jsecurity.exception.JSecurityException;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,12 +45,6 @@ public class SecurityServiceImpl implements SecurityService {
 
 	@Autowired
 	private SecurityProperties kcProperties;
-
-	/**
-	 * Lista com todos os resources.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractResourceConfiguration> resources;
 
 	/**
 	 * Lista com todos os Aggregate Policies.
@@ -110,32 +100,6 @@ public class SecurityServiceImpl implements SecurityService {
 	@Autowired(required = false)
 	private Collection<AbstractPermissionConfiguration> permissions;
 
-//	@EventListener(ContextRefreshedEvent.class)
-	protected void register() {
-		try {
-			log.info("Iniciando registro da aplicação no Keycloak");
-//			registerRealms();
-//			registerClients();
-//			registerUsers();
-//			registerAuthScopes();
-			registerResources();
-
-			log.info("Policies");
-			registerRolePolicies();
-			registerGroupPolicies();
-			registerClientPolicies();
-			registerJsPolicies();
-			registerRulePolicies();
-			registerTimePolicies();
-			registerUserPolicies();
-			registerAggregatePolicies();
-			log.info("Permissions");
-			registerPermissions();
-		} catch (ProcessingException e) {
-			throw new JSecurityException(String.format("Erro ao conectar ao Keycloak em: %s", kcProperties.getAuthServerUrl()));
-		}
-	}
-
 	@Override
 	public boolean register(RealmRepresentation representation) {
 		if (!hasRealm()) {
@@ -155,34 +119,25 @@ public class SecurityServiceImpl implements SecurityService {
 			keycloak.realm(kcProperties.getRealm()).clients().create(representation);
 			// Verifica se o recurso de authorization está habilitado para o client.
 			if (Objects.nonNull(representation.getAuthorizationServicesEnabled())) {
-				// Remove o resource default gerado com o client.
-				deleteDefaultResource();
-				// Remove a policy default gerada com o client.
-				deleteDefaultPolicy();
+				// Remove o resource default gerado com o client. @formatter:off
+				getClientResource().authorization().resources().resources().stream()
+					.filter(p -> p.getName().equals("Default Resource"))
+					.findAny()
+					.ifPresent(p -> getClientResource().authorization().resources().resource(p.getId()).remove());
+				// @formatter:on
+
+				// Remove a policy default gerada com o client. @formatter:off
+				getClientResource().authorization().policies().policies().stream()
+					.filter(p -> p.getName().equals("Default Policy"))
+					.findAny()
+					.ifPresent(p -> getClientResource().authorization().policies().policy(p.getId()).remove());
+				// @formatter:on
 			}
 			log.info("\t Client '{}' registrado com sucesso.", representation.getClientId());
 			return true;
 		}
 		log.info("\t Client '{}' já existe.", representation.getClientId());
 		return false;
-	}
-
-	private void deleteDefaultResource() {
-		// @formatter:off
-		getClientResource().authorization().resources().resources().stream()
-			.filter(p -> p.getName().equals("Default Resource"))
-			.findAny()
-			.ifPresent(p -> getClientResource().authorization().resources().resource(p.getId()).remove());
-		// @formatter:on
-	}
-
-	private void deleteDefaultPolicy() {
-		// @formatter:off
-		getClientResource().authorization().policies().policies().stream()
-			.filter(p -> p.getName().equals("Default Policy"))
-			.findAny()
-			.ifPresent(p -> getClientResource().authorization().policies().policy(p.getId()).remove());
-		// @formatter:on
 	}
 
 	@Override
@@ -197,23 +152,17 @@ public class SecurityServiceImpl implements SecurityService {
 		return false;
 	}
 
-	private void registerResources() {
-		log.info("* Resources");
-		if (Objects.nonNull(resources)) {
-			for (AbstractResourceConfiguration resource : resources) {
-				ResourceRepresentation representation = new ResourceRepresentation();
-				resource.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
 	@Override
-	public void register(ResourceRepresentation representation) {
+	public boolean register(ResourceRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' do resource deve ser definido.");
 		Assert.notEmpty(representation.getScopes(), "O atributo 'scopes' do resource deve ser definido.");
-		getClientResource().authorization().resources().create(representation);
-		log.info("\t Resource '{}' registrado com sucesso.", representation.getName());
+		if (!hasResource(representation.getName())) {
+			getClientResource().authorization().resources().create(representation);
+			log.info("\t Resource '{}' registrado com sucesso.", representation.getName());
+			return true;
+		}
+		log.info("\t Resource '{}' já existe.", representation.getName());
+		return false;
 	}
 
 	private void registerClientPolicies() {
@@ -453,6 +402,14 @@ public class SecurityServiceImpl implements SecurityService {
 
 	private boolean hasScope(String scopeName) {
 		return Objects.nonNull(getClientResource().authorization().scopes().findByName(scopeName));
+	}
+
+	private boolean hasPolicy(String policyName) {
+		return Objects.nonNull(getClientResource().authorization().policies().findByName(policyName));
+	}
+
+	private boolean hasResource(String resourceName) {
+		return getClientResource().authorization().resources().findByName(resourceName).isEmpty() == false;
 	}
 
 }
