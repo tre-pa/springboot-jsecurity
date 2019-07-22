@@ -24,8 +24,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractGroupPolicyConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractJsPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractRulePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractTimePolicyConfiguration;
@@ -49,18 +47,6 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	@Autowired(required = false)
 	private Collection<AbstractAggregatePolicyConfiguration> aggregatePolcies;
-
-	/**
-	 * Lista com todos os Group Policies.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractGroupPolicyConfiguration> groupPolicies;
-
-	/**
-	 * Lista com todos os Js Policies.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractJsPolicyConfiguration> jsPolicies;
 
 	/**
 	 * Lista com todos os Rule Policies.
@@ -181,16 +167,6 @@ public class SecurityServiceImpl implements SecurityService {
 		return false;
 	}
 
-	private void registerGroupPolicies() {
-		if (Objects.nonNull(groupPolicies)) {
-			for (AbstractGroupPolicyConfiguration policy : groupPolicies) {
-				GroupPolicyRepresentation representation = new GroupPolicyRepresentation();
-				policy.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
 	/**
 	 * Método registrador de Group Policy.
 	 * 
@@ -199,20 +175,11 @@ public class SecurityServiceImpl implements SecurityService {
 	@Override
 	public boolean register(GroupPolicyRepresentation representation) {
 		Assert.hasLength(representation.getName(), "O atributo 'name' da GrupoPolicy é obrigatório.");
+		Assert.notEmpty(representation.getGroups(), String.format("É necessário atribuir pelo menos 1 group a GroupPolicy '%s'.", representation.getName()));
 
 		getClientResource().authorization().policies().group().create(representation);
 		log.info("\t Group Policy '{}' registrado com sucesso.", representation.getName());
 		return true;
-	}
-
-	private void registerJsPolicies() {
-		if (Objects.nonNull(jsPolicies)) {
-			for (AbstractJsPolicyConfiguration policy : jsPolicies) {
-				JSPolicyRepresentation representation = new JSPolicyRepresentation();
-				policy.configure(representation);
-				this.register(representation);
-			}
-		}
 	}
 
 	/**
@@ -221,9 +188,13 @@ public class SecurityServiceImpl implements SecurityService {
 	 * @param rolePolicy
 	 */
 	@Override
-	public void register(JSPolicyRepresentation representation) {
+	public boolean register(JSPolicyRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na JSPolicy.");
+		Assert.hasText(representation.getCode(), String.format("O atributo 'code' é obrigatório na JSPolicy '%s'.", representation.getName()));
+
 		getClientResource().authorization().policies().js().create(representation);
 		log.info("\t Js Policy '{}' registrado com sucesso.", representation.getName());
+		return true;
 	}
 
 	private void registerRulePolicies() {

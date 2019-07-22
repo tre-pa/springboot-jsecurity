@@ -80,7 +80,7 @@ public interface SecurityService {
 	 * 
 	 * @param representation {@link JSPolicyRepresentation}
 	 */
-	void register(JSPolicyRepresentation representation);
+	boolean register(JSPolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Policy Rule.
