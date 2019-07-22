@@ -62,11 +62,11 @@ public interface SecurityService {
 	boolean register(ClientPolicyRepresentation representation);
 
 	/**
-	 * Método registrador de Policy do tipo Aggregate.
+	 * Método registrador de Policy Role.
 	 * 
-	 * @param representation {@link AggregatePolicyRepresentation}
+	 * @param representation {@link RolePolicyRepresentation}
 	 */
-	void register(AggregatePolicyRepresentation representation);
+	boolean register(RolePolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Policy do tipo Group.
@@ -81,13 +81,6 @@ public interface SecurityService {
 	 * @param representation {@link JSPolicyRepresentation}
 	 */
 	void register(JSPolicyRepresentation representation);
-
-	/**
-	 * Método registrador de Policy Role.
-	 * 
-	 * @param representation {@link RolePolicyRepresentation}
-	 */
-	void register(RolePolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Policy Rule.
@@ -109,6 +102,13 @@ public interface SecurityService {
 	 * @param representation {@link UserPolicyRepresentation}
 	 */
 	void register(UserPolicyRepresentation representation);
+
+	/**
+	 * Método registrador de Policy do tipo Aggregate.
+	 * 
+	 * @param representation {@link AggregatePolicyRepresentation}
+	 */
+	void register(AggregatePolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Permission.

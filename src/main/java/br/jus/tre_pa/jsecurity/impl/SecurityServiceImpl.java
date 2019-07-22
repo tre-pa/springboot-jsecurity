@@ -27,7 +27,6 @@ import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractGroupPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractJsPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractRolePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractRulePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractTimePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractUserPolicyConfiguration;
@@ -62,12 +61,6 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	@Autowired(required = false)
 	private Collection<AbstractJsPolicyConfiguration> jsPolicies;
-
-	/**
-	 * Lista com todos os Role Policies.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractRolePolicyConfiguration> rolePolicies;
 
 	/**
 	 * Lista com todos os Rule Policies.
@@ -216,25 +209,17 @@ public class SecurityServiceImpl implements SecurityService {
 		log.info("\t Js Policy '{}' registrado com sucesso.", representation.getName());
 	}
 
-	private void registerRolePolicies() {
-		if (Objects.nonNull(rolePolicies)) {
-			for (AbstractRolePolicyConfiguration policy : rolePolicies) {
-				RolePolicyRepresentation representation = new RolePolicyRepresentation();
-				policy.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
 	/**
 	 * Método registrador de Role Policy.
 	 * 
 	 * @param policy
 	 */
 	@Override
-	public void register(RolePolicyRepresentation representation) {
+	public boolean register(RolePolicyRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' da RolePolicy é obrigatório.");
 		getClientResource().authorization().policies().role().create(representation);
 		log.info("\t Role Policy '{}' registrada com sucesso.", representation.getName());
+		return true;
 	}
 
 	private void registerRulePolicies() {
