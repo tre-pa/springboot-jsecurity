@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 
 import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractTimePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractUserPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
@@ -46,12 +45,6 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	@Autowired(required = false)
 	private Collection<AbstractAggregatePolicyConfiguration> aggregatePolcies;
-
-	/**
-	 * Lista com todos os Time Policies.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractTimePolicyConfiguration> timePolicies;
 
 	/**
 	 * Lista com todos os User Policies.
@@ -180,11 +173,6 @@ public class SecurityServiceImpl implements SecurityService {
 		return true;
 	}
 
-	/**
-	 * Método registrador de Rule Policy.
-	 * 
-	 * @param rolePolicy
-	 */
 	@Override
 	public boolean register(RulePolicyRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na RulePolicy.");
@@ -194,25 +182,13 @@ public class SecurityServiceImpl implements SecurityService {
 		return true;
 	}
 
-	private void registerTimePolicies() {
-		if (Objects.nonNull(timePolicies)) {
-			for (AbstractTimePolicyConfiguration policy : timePolicies) {
-				TimePolicyRepresentation representation = new TimePolicyRepresentation();
-				policy.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
-	/**
-	 * Método registrador de Time Policy.
-	 * 
-	 * @param rolePolicy
-	 */
 	@Override
-	public void register(TimePolicyRepresentation representation) {
+	public boolean register(TimePolicyRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na TimePolicy.");
+
 		getClientResource().authorization().policies().time().create(representation);
 		log.info("\t Time Policy '{}' registrado com sucesso.", representation.getName());
+		return true;
 	}
 
 	private void registerUserPolicies() {

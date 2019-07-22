@@ -94,7 +94,7 @@ public interface SecurityService {
 	 * 
 	 * @param representation {@link TimePolicyRepresentation}
 	 */
-	void register(TimePolicyRepresentation representation);
+	boolean register(TimePolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Policy User.
