@@ -1,6 +1,5 @@
 package br.jus.tre_pa.jsecurity.impl;
 
-import java.util.Collection;
 import java.util.Objects;
 
 import org.keycloak.admin.client.Keycloak;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,12 +35,6 @@ public class SecurityServiceImpl implements SecurityService {
 
 	@Autowired
 	private SecurityProperties kcProperties;
-
-	/**
-	 * Lista com todas as Permissions.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractPermissionConfiguration> permissions;
 
 	@Override
 	public boolean register(RealmRepresentation representation) {
@@ -195,26 +187,16 @@ public class SecurityServiceImpl implements SecurityService {
 		return true;
 	}
 
-	private void registerPermissions() {
-		log.info("* Permissions ");
-		if (Objects.nonNull(permissions)) {
-			for (AbstractPermissionConfiguration permission : permissions) {
-				ResourcePermissionRepresentation representation = new ResourcePermissionRepresentation();
-				permission.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
 	/**
 	 * Método registraro de Permission.
 	 * 
 	 * @param permission
 	 */
 	@Override
-	public void register(ResourcePermissionRepresentation representation) {
+	public boolean register(ResourcePermissionRepresentation representation) {
 		getClientResource().authorization().permissions().resource().create(representation);
 		log.info("\t Permission '{}' registrado com sucesso.", representation.getName());
+		return true;
 	}
 
 	/*

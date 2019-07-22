@@ -115,7 +115,7 @@ public interface SecurityService {
 	 * 
 	 * @param representation {@link ResourcePermissionRepresentation}
 	 */
-	void register(ResourcePermissionRepresentation representation);
+	boolean register(ResourcePermissionRepresentation representation);
 
 	/**
 	 * Método registrador de User.
