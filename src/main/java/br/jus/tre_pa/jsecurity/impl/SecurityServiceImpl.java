@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 
 import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractRulePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractTimePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractUserPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
@@ -47,12 +46,6 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	@Autowired(required = false)
 	private Collection<AbstractAggregatePolicyConfiguration> aggregatePolcies;
-
-	/**
-	 * Lista com todos os Rule Policies.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractRulePolicyConfiguration> rulePolicies;
 
 	/**
 	 * Lista com todos os Time Policies.
@@ -167,11 +160,6 @@ public class SecurityServiceImpl implements SecurityService {
 		return false;
 	}
 
-	/**
-	 * Método registrador de Group Policy.
-	 * 
-	 * @param policy
-	 */
 	@Override
 	public boolean register(GroupPolicyRepresentation representation) {
 		Assert.hasLength(representation.getName(), "O atributo 'name' da GrupoPolicy é obrigatório.");
@@ -182,11 +170,6 @@ public class SecurityServiceImpl implements SecurityService {
 		return true;
 	}
 
-	/**
-	 * Método registrador de Js Policy.
-	 * 
-	 * @param rolePolicy
-	 */
 	@Override
 	public boolean register(JSPolicyRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na JSPolicy.");
@@ -197,25 +180,18 @@ public class SecurityServiceImpl implements SecurityService {
 		return true;
 	}
 
-	private void registerRulePolicies() {
-		if (Objects.nonNull(rulePolicies)) {
-			for (AbstractRulePolicyConfiguration policy : rulePolicies) {
-				RulePolicyRepresentation representation = new RulePolicyRepresentation();
-				policy.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
 	/**
 	 * Método registrador de Rule Policy.
 	 * 
 	 * @param rolePolicy
 	 */
 	@Override
-	public void register(RulePolicyRepresentation representation) {
+	public boolean register(RulePolicyRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na RulePolicy.");
+
 		getClientResource().authorization().policies().rule().create(representation);
 		log.info("\t Rule Policy '{}' registrado com sucesso.", representation.getName());
+		return true;
 	}
 
 	private void registerTimePolicies() {
