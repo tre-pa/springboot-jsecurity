@@ -101,14 +101,14 @@ public interface SecurityService {
 	 * 
 	 * @param representation {@link UserPolicyRepresentation}
 	 */
-	void register(UserPolicyRepresentation representation);
+	boolean register(UserPolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Policy do tipo Aggregate.
 	 * 
 	 * @param representation {@link AggregatePolicyRepresentation}
 	 */
-	void register(AggregatePolicyRepresentation representation);
+	boolean register(AggregatePolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Permission.

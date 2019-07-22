@@ -23,9 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractUserPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
@@ -39,18 +37,6 @@ public class SecurityServiceImpl implements SecurityService {
 
 	@Autowired
 	private SecurityProperties kcProperties;
-
-	/**
-	 * Lista com todos os Aggregate Policies.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractAggregatePolicyConfiguration> aggregatePolcies;
-
-	/**
-	 * Lista com todos os User Policies.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractUserPolicyConfiguration> userPolicies;
 
 	/**
 	 * Lista com todas as Permissions.
@@ -191,48 +177,22 @@ public class SecurityServiceImpl implements SecurityService {
 		return true;
 	}
 
-	private void registerUserPolicies() {
-		if (Objects.nonNull(userPolicies)) {
-			for (AbstractUserPolicyConfiguration policy : userPolicies) {
-				UserPolicyRepresentation representation = new UserPolicyRepresentation();
-				policy.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
-	/**
-	 * Método registrador de User Policy.
-	 * 
-	 * @param rolePolicy
-	 */
 	@Override
-	public void register(UserPolicyRepresentation representation) {
+	public boolean register(UserPolicyRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na UserPolicy.");
 		getClientResource().authorization().policies().user().create(representation);
 		log.info("\t User Policy '{}' registrado com sucesso.", representation.getName());
+		return true;
 	}
 
-	private void registerAggregatePolicies() {
-		if (Objects.nonNull(aggregatePolcies)) {
-			for (AbstractAggregatePolicyConfiguration policy : aggregatePolcies) {
-				AggregatePolicyRepresentation representation = new AggregatePolicyRepresentation();
-				policy.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
-	/**
-	 * Método registrador de Aggragate Policy.
-	 * 
-	 * @param policy
-	 */
 	@Override
-	public void register(AggregatePolicyRepresentation representation) {
+	public boolean register(AggregatePolicyRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' da aggregate policy deve ser definido.");
 		Assert.notEmpty(representation.getPolicies(), "o atributo 'policies' da agregate policy deve ser definido.");
+
 		getClientResource().authorization().policies().aggregate().create(representation);
 		log.info("Aggregate Policy '{}' registrada com sucesso.", representation.getName());
+		return true;
 	}
 
 	private void registerPermissions() {
