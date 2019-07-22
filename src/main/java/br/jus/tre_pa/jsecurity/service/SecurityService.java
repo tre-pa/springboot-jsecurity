@@ -73,7 +73,7 @@ public interface SecurityService {
 	 * 
 	 * @param representation {@link GroupPolicyRepresentation}
 	 */
-	void register(GroupPolicyRepresentation representation);
+	boolean register(GroupPolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Policy do Tipo Javascript.

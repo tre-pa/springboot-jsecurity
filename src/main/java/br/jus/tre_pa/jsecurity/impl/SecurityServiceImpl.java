@@ -129,6 +129,7 @@ public class SecurityServiceImpl implements SecurityService {
 	@Override
 	public boolean register(ScopeRepresentation representation) {
 		Assert.hasText(representation.getName(), String.format("O atributo 'name' do scope (%s) deve ser definido.", representation.getClass().getName()));
+		// Verifica a existência do scope.
 		if (!hasScope(representation.getName())) {
 			getClientResource().authorization().scopes().create(representation);
 			log.info("\t Scope '{}' registrado com sucesso.", representation.getName());
@@ -157,13 +158,26 @@ public class SecurityServiceImpl implements SecurityService {
 	public boolean register(ClientPolicyRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' da ClientPolicy '{}' é obrigatório.");
 		Assert.notEmpty(representation.getClients(), "É necessário adicionar pelo menos 1 client a policy.");
-
+		// Verifica se o policy existe
 		if (!hasPolicy(representation.getName())) {
 			getClientResource().authorization().policies().client().create(representation);
 			log.info("\t Client Policy '{}' registrado com sucesso.", representation.getName());
 			return true;
 		}
 		log.info("\t Client Policy '{}' já existe.");
+		return false;
+	}
+
+	@Override
+	public boolean register(RolePolicyRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' da RolePolicy é obrigatório.");
+		// Verifica se o role existe ou no client ou no realm.
+		if (hasClientRole(representation.getName()) || hasRealmRole(representation.getName())) {
+			getClientResource().authorization().policies().role().create(representation);
+			log.info("\t Role Policy '{}' registrada com sucesso.", representation.getName());
+			return true;
+		}
+		log.info("Role '{}' inexistente. ", representation.getName());
 		return false;
 	}
 
@@ -183,9 +197,12 @@ public class SecurityServiceImpl implements SecurityService {
 	 * @param policy
 	 */
 	@Override
-	public void register(GroupPolicyRepresentation representation) {
+	public boolean register(GroupPolicyRepresentation representation) {
+		Assert.hasLength(representation.getName(), "O atributo 'name' da GrupoPolicy é obrigatório.");
+
 		getClientResource().authorization().policies().group().create(representation);
 		log.info("\t Group Policy '{}' registrado com sucesso.", representation.getName());
+		return true;
 	}
 
 	private void registerJsPolicies() {
@@ -207,19 +224,6 @@ public class SecurityServiceImpl implements SecurityService {
 	public void register(JSPolicyRepresentation representation) {
 		getClientResource().authorization().policies().js().create(representation);
 		log.info("\t Js Policy '{}' registrado com sucesso.", representation.getName());
-	}
-
-	/**
-	 * Método registrador de Role Policy.
-	 * 
-	 * @param policy
-	 */
-	@Override
-	public boolean register(RolePolicyRepresentation representation) {
-		Assert.hasText(representation.getName(), "O atributo 'name' da RolePolicy é obrigatório.");
-		getClientResource().authorization().policies().role().create(representation);
-		log.info("\t Role Policy '{}' registrada com sucesso.", representation.getName());
-		return true;
 	}
 
 	private void registerRulePolicies() {
@@ -383,6 +387,14 @@ public class SecurityServiceImpl implements SecurityService {
 
 	private boolean hasResource(String resourceName) {
 		return getClientResource().authorization().resources().findByName(resourceName).isEmpty() == false;
+	}
+
+	private boolean hasClientRole(String roleName) {
+		return Objects.nonNull(getClientResource().roles().get(roleName));
+	}
+
+	private boolean hasRealmRole(String roleName) {
+		return Objects.nonNull(keycloak.realm(kcProperties.getRealm()).roles().get(roleName));
 	}
 
 }
