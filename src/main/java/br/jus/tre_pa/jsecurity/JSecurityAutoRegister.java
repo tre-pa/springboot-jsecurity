@@ -42,6 +42,7 @@ public class JSecurityAutoRegister {
 			applicationContext.getBean(UserRegister.class).register();
 			applicationContext.getBean(AuthzScopeRegister.class).register();
 			applicationContext.getBean(ResourceRegister.class).register();
+			applicationContext.getBean(ClientRegister.class).register();
 		} catch (ProcessingException e) {
 			throw new JSecurityException(String.format("Erro ao conectar ao Keycloak em: %s", securityProperties.getAuthServerUrl()));
 		}

@@ -55,18 +55,18 @@ public interface SecurityService {
 	boolean register(ResourceRepresentation representation);
 
 	/**
+	 * Método registrador de Policy do tipo Client.
+	 * 
+	 * @param representation {@link ClientPolicyRepresentation}
+	 */
+	boolean register(ClientPolicyRepresentation representation);
+
+	/**
 	 * Método registrador de Policy do tipo Aggregate.
 	 * 
 	 * @param representation {@link AggregatePolicyRepresentation}
 	 */
 	void register(AggregatePolicyRepresentation representation);
-
-	/**
-	 * Método registrador de Policy do tipo Client.
-	 * 
-	 * @param representation {@link ClientPolicyRepresentation}
-	 */
-	void register(ClientPolicyRepresentation representation);
 
 	/**
 	 * Método registrador de Policy do tipo Group.

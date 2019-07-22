@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import br.jus.tre_pa.jsecurity.AbstractAggregatePolicyConfiguration;
-import br.jus.tre_pa.jsecurity.AbstractClientPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractGroupPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractJsPolicyConfiguration;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
@@ -51,12 +50,6 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	@Autowired(required = false)
 	private Collection<AbstractAggregatePolicyConfiguration> aggregatePolcies;
-
-	/**
-	 * Lista com todos Client Policies.
-	 */
-	@Autowired(required = false)
-	private Collection<AbstractClientPolicyConfiguration> clientPolicies;
 
 	/**
 	 * Lista com todos os Group Policies.
@@ -152,6 +145,7 @@ public class SecurityServiceImpl implements SecurityService {
 		return false;
 	}
 
+	// TODO Verificar a existência dos Scopes antes de criar o Resource.
 	@Override
 	public boolean register(ResourceRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' do resource deve ser definido.");
@@ -165,25 +159,19 @@ public class SecurityServiceImpl implements SecurityService {
 		return false;
 	}
 
-	private void registerClientPolicies() {
-		if (Objects.nonNull(clientPolicies)) {
-			for (AbstractClientPolicyConfiguration policy : clientPolicies) {
-				ClientPolicyRepresentation representation = new ClientPolicyRepresentation();
-				policy.configure(representation);
-				this.register(representation);
-			}
-		}
-	}
-
-	/**
-	 * Método registrador de Client Policy.
-	 * 
-	 * @param policy
-	 */
+	// TODO Exibir nome da classe no erro de assert.
 	@Override
-	public void register(ClientPolicyRepresentation representation) {
-		getClientResource().authorization().policies().client().create(representation);
-		log.info("\t Client Policy '{}' registrado com sucesso.", representation.getName());
+	public boolean register(ClientPolicyRepresentation representation) {
+		Assert.hasText(representation.getName(), "O atributo 'name' da ClientPolicy '{}' é obrigatório.");
+		Assert.notEmpty(representation.getClients(), "É necessário adicionar pelo menos 1 client a policy.");
+
+		if (!hasPolicy(representation.getName())) {
+			getClientResource().authorization().policies().client().create(representation);
+			log.info("\t Client Policy '{}' registrado com sucesso.", representation.getName());
+			return true;
+		}
+		log.info("\t Client Policy '{}' já existe.");
+		return false;
 	}
 
 	private void registerGroupPolicies() {
