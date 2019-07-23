@@ -10,19 +10,19 @@ import org.springframework.stereotype.Component;
 
 import br.jus.tre_pa.jsecurity.config.SecurityProperties;
 import br.jus.tre_pa.jsecurity.exception.JSecurityException;
-import br.jus.tre_pa.jsecurity.register.AggregatePolicyRegister;
-import br.jus.tre_pa.jsecurity.register.ClientPolicyRegister;
-import br.jus.tre_pa.jsecurity.register.ClientRegister;
-import br.jus.tre_pa.jsecurity.register.GroupPolicyRegister;
-import br.jus.tre_pa.jsecurity.register.JSPolicyRegister;
-import br.jus.tre_pa.jsecurity.register.PermissionRegister;
-import br.jus.tre_pa.jsecurity.register.RealmRegister;
-import br.jus.tre_pa.jsecurity.register.ResourceRegister;
-import br.jus.tre_pa.jsecurity.register.RolePolicyRegister;
-import br.jus.tre_pa.jsecurity.register.RulePolicyRegister;
-import br.jus.tre_pa.jsecurity.register.TimePolicyRegister;
-import br.jus.tre_pa.jsecurity.register.UserPolicyRegister;
-import br.jus.tre_pa.jsecurity.register.UserRegister;
+import br.jus.tre_pa.jsecurity.impl.AggregatePolicyRegister;
+import br.jus.tre_pa.jsecurity.impl.ClientPolicyRegister;
+import br.jus.tre_pa.jsecurity.impl.ClientRegister;
+import br.jus.tre_pa.jsecurity.impl.GroupPolicyRegister;
+import br.jus.tre_pa.jsecurity.impl.JSPolicyRegister;
+import br.jus.tre_pa.jsecurity.impl.PermissionRegister;
+import br.jus.tre_pa.jsecurity.impl.RealmRegister;
+import br.jus.tre_pa.jsecurity.impl.ResourceRegister;
+import br.jus.tre_pa.jsecurity.impl.RolePolicyRegister;
+import br.jus.tre_pa.jsecurity.impl.RulePolicyRegister;
+import br.jus.tre_pa.jsecurity.impl.TimePolicyRegister;
+import br.jus.tre_pa.jsecurity.impl.UserPolicyRegister;
+import br.jus.tre_pa.jsecurity.impl.UserRegister;
 import lombok.extern.slf4j.Slf4j;
 
 /**

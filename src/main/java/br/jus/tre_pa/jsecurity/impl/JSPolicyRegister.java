@@ -1,4 +1,4 @@
-package br.jus.tre_pa.jsecurity.register;
+package br.jus.tre_pa.jsecurity.impl;
 
 import java.util.Collection;
 import java.util.Objects;
