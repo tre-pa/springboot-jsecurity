@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import br.jus.tre_pa.jsecurity.AbstractClientConfiguration;
-import br.jus.tre_pa.jsecurity.JSecurityRegister;
+import br.jus.tre_pa.jsecurity.register.JSecurityRegister;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 
