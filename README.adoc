@@ -13,7 +13,7 @@ O projeto `springboot-jsecurity` tem como objetivo:
 
 == Instalação
 
-[source, xml]
+[source, xml, linenums]
 ----
 <dependency>
 	<groupId>br.jus.tre_pa.jsecurity</groupId>
@@ -24,9 +24,9 @@ O projeto `springboot-jsecurity` tem como objetivo:
 
 == Informações do contexto de segurança
 
-Para obter as informações do contexto de segurança do keycloak basta injetar o bena abaixo:
+Para obter as informações do contexto de segurança do keycloak basta injetar o bean abaixo:
 
-[source, java]
+[source, java, linenums]
 ----
 @Autowired
 private KeycloakSecurityContext keycloakSecurityContext;
@@ -40,7 +40,7 @@ via Java
 
 === Registrando um Realm
 
-[source, java]
+[source, java, linenums ]
 ----
 @Component
 public class AppRealm extends AbstractKcRealm {
@@ -58,11 +58,10 @@ public class AppRealm extends AbstractKcRealm {
 
 === Registrando um Client
 
-[source, java]
+[source, java, linenums ]
 ----
 @Component
-@Order(1)
-public class BackendClient extends AbstractKcClient {
+public class BackendClient extends AbstractClientConfiguration {
 
 	@Override
 	public void configure(ClientRepresentation representation) {
@@ -75,45 +74,44 @@ public class BackendClient extends AbstractKcClient {
 		representation.setServiceAccountsEnabled(true);
 		representation.setDirectAccessGrantsEnabled(true);
 		representation.setAuthorizationServicesEnabled(true);
-		representation.setDefaultRoles(new String[] { "REPORT_MNGT", "USER" });
+		representation.setDefaultRoles(new String[] { "USER" });
 	}
-
-}
-----
-
-=== Registrando um Authorization Scope
-
-[source, java]
-----
-@Component
-public class GetAuthScope extends AbstractKcAuthzScope {
 
 	@Override
-	public void configure(ScopeRepresentation representation) {
-		representation.setName("GET");
+	public List<String> roles() {
+		return Arrays.asList("REPORT_MNGT");
+	}
+
+	@Override
+	public ClientRepresentation frontend() {
+		ClientRepresentation representation = new ClientRepresentation();
+		representation.setName(getKcProperties().getClientId().replace("backend", "frontend"));
+		representation.setClientId(getKcProperties().getClientId().replace("backend", "frontend"));
+		representation.setEnabled(true);
+		representation.setWebOrigins(Lists.newArrayList("*"));
+		representation.setRedirectUris(getKcProperties().getRedirectUris());
+		representation.setBaseUrl(getKcProperties().getBaseUrl());
+		representation.setPublicClient(true);
+		representation.setFullScopeAllowed(false);
+		return representation;
 	}
 
 }
+
 ----
 
 === Registrando um Resource
 
-[source, java]
+[source, java, linenums ]
 ----
 @Component
-public class JReportResource extends AbstractKcResource {
+public class JReportMngtResource extends AbstractResourceConfiguration {
 
 	@Override
 	public void configure(ResourceRepresentation representation) {
-		representation.setName("JREPORT_RESOURCE");
-		representation.setUris(Sets.newHashSet("/api/jreport/*"));
-		// @formatter:off
-		representation.setScopes(Sets.newHashSet(
-				new ScopeRepresentation("GET"),
-				new ScopeRepresentation("PUT"),
-				new ScopeRepresentation("DELETE"),
-				new ScopeRepresentation("POST")));
-		// @formatter:on
+		representation.setName("JREPORT_MNGT_RESOURCE");
+		representation.setUris(Sets.newHashSet("/api/mngt/jreport/*"));
+		representation.addScope("GET", "PUT", "DELETE", "POST");
 	}
 
 }
@@ -123,7 +121,7 @@ public class JReportResource extends AbstractKcResource {
 
 ==== Tipo Role
 
-[source, java]
+[source, java, linenums ]
 ----
 @Component
 public class UserPolicy extends AbstractKcRolePolicy {
@@ -137,9 +135,37 @@ public class UserPolicy extends AbstractKcRolePolicy {
 }
 ----
 
+==== Tipo Group
+
+__TODO__
+
+==== Tipo Client
+
+__TODO__
+
+==== Tipo User
+
+__TODO__
+
+==== Tipo Time
+
+__TODO__
+
+==== Tipo JS (JavaScript)
+
+__TODO__
+
+==== Tipo Rule
+
+__TODO__
+
+==== Tipo Aggregate
+
+__TODO__
+
 === Registrando uma Permission
 
-[source, java]
+[source, java, linenums ]
 ----
 @Component
 public class JReportPermission extends AbstractKcPermission {
