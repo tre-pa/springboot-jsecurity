@@ -15,8 +15,6 @@ import org.keycloak.representations.idm.authorization.RulePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.TimePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
 
-import br.jus.tre_pa.jsecurity.config.SecurityProperties;
-
 /**
  * Classe com os serviços para manipulação do Keycloak.
  * 
@@ -117,7 +115,7 @@ public interface SecurityService {
 	boolean register(UserRepresentation representation);
 
 	/**
-	 * Retorna o ClientResource com clientId definido pela properiedade {@link SecurityProperties#getClientId()}
+	 * Retorna o ClientResource com clientId.
 	 * 
 	 * @return
 	 */
