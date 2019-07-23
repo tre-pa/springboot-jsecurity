@@ -10,8 +10,10 @@ import org.springframework.stereotype.Component;
 import br.jus.tre_pa.jsecurity.AbstractPermissionConfiguration;
 import br.jus.tre_pa.jsecurity.JSecurityRegister;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class PermissionRegister implements JSecurityRegister {
 
 	@Autowired
@@ -24,6 +26,7 @@ public class PermissionRegister implements JSecurityRegister {
 
 	@Override
 	public void register() {
+		log.info("-- Permissions --");
 		if (Objects.nonNull(permissions)) {
 			for (AbstractPermissionConfiguration permission : permissions) {
 				ResourcePermissionRepresentation representation = new ResourcePermissionRepresentation();

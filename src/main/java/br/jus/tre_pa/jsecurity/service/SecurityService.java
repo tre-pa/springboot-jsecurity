@@ -12,7 +12,6 @@ import org.keycloak.representations.idm.authorization.ResourcePermissionRepresen
 import org.keycloak.representations.idm.authorization.ResourceRepresentation;
 import org.keycloak.representations.idm.authorization.RolePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.RulePolicyRepresentation;
-import org.keycloak.representations.idm.authorization.ScopeRepresentation;
 import org.keycloak.representations.idm.authorization.TimePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
 
@@ -39,13 +38,6 @@ public interface SecurityService {
 	 * @param representation {@link ClientRepresentation}
 	 */
 	boolean register(ClientRepresentation representation);
-
-	/**
-	 * Método registrador do AuthzScope.
-	 * 
-	 * @param authScope ScopeRepresentation {@link ScopeRepresentation}
-	 */
-	boolean register(ScopeRepresentation representation);
 
 	/**
 	 * Método registrador de Resource.

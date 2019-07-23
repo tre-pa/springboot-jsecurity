@@ -20,12 +20,12 @@ public class AggregatePolicyRegister implements JSecurityRegister {
 	 * Lista com todos os Aggregate Policies.
 	 */
 	@Autowired(required = false)
-	private Collection<AbstractAggregatePolicyConfiguration> aggregatePolcies;
+	private Collection<AbstractAggregatePolicyConfiguration> aggregatePolicies;
 
 	@Override
 	public void register() {
-		if (Objects.nonNull(aggregatePolcies)) {
-			for (AbstractAggregatePolicyConfiguration policy : aggregatePolcies) {
+		if (Objects.nonNull(aggregatePolicies)) {
+			for (AbstractAggregatePolicyConfiguration policy : aggregatePolicies) {
 				AggregatePolicyRepresentation representation = new AggregatePolicyRepresentation();
 				policy.configure(representation);
 				securityService.register(representation);

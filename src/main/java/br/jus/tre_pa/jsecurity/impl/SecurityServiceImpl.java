@@ -15,7 +15,6 @@ import org.keycloak.representations.idm.authorization.ResourcePermissionRepresen
 import org.keycloak.representations.idm.authorization.ResourceRepresentation;
 import org.keycloak.representations.idm.authorization.RolePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.RulePolicyRepresentation;
-import org.keycloak.representations.idm.authorization.ScopeRepresentation;
 import org.keycloak.representations.idm.authorization.TimePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.UserPolicyRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,24 +75,12 @@ public class SecurityServiceImpl implements SecurityService {
 		return false;
 	}
 
-	@Override
-	public boolean register(ScopeRepresentation representation) {
-		Assert.hasText(representation.getName(), String.format("O atributo 'name' do scope (%s) deve ser definido.", representation.getClass().getName()));
-		// Verifica a existência do scope.
-		if (!hasScope(representation.getName())) {
-			getClientResource().authorization().scopes().create(representation);
-			log.info("\t Scope '{}' registrado com sucesso.", representation.getName());
-			return true;
-		}
-		log.info("\t Scope '{}' já existe.", representation.getName());
-		return false;
-	}
-
 	// TODO Verificar a existência dos Scopes antes de criar o Resource.
 	@Override
 	public boolean register(ResourceRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' do resource deve ser definido.");
 		Assert.notEmpty(representation.getScopes(), "O atributo 'scopes' do resource deve ser definido.");
+
 		if (!hasResource(representation.getName())) {
 			getClientResource().authorization().resources().create(representation);
 			log.info("\t Resource '{}' registrado com sucesso.", representation.getName());
@@ -109,7 +96,7 @@ public class SecurityServiceImpl implements SecurityService {
 		Assert.hasText(representation.getName(), "O atributo 'name' da ClientPolicy '{}' é obrigatório.");
 		Assert.notEmpty(representation.getClients(), "É necessário adicionar pelo menos 1 client a policy.");
 		// Verifica se o policy existe
-		if (!hasPolicy(representation.getName())) {
+		if (!hasClient(representation.getName())) {
 			getClientResource().authorization().policies().client().create(representation);
 			log.info("\t Client Policy '{}' registrado com sucesso.", representation.getName());
 			return true;

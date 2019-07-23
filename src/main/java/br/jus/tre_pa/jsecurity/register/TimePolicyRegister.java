@@ -10,8 +10,10 @@ import org.springframework.stereotype.Component;
 import br.jus.tre_pa.jsecurity.AbstractTimePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.JSecurityRegister;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class TimePolicyRegister implements JSecurityRegister {
 
 	@Autowired
@@ -26,6 +28,7 @@ public class TimePolicyRegister implements JSecurityRegister {
 	@Override
 	public void register() {
 		if (Objects.nonNull(timePolicies)) {
+			log.info("-- Time Policies --");
 			for (AbstractTimePolicyConfiguration policy : timePolicies) {
 				TimePolicyRepresentation representation = new TimePolicyRepresentation();
 				policy.configure(representation);

@@ -10,8 +10,10 @@ import org.springframework.stereotype.Component;
 import br.jus.tre_pa.jsecurity.AbstractRolePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.JSecurityRegister;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class RolePolicyRegister implements JSecurityRegister {
 
 	@Autowired
@@ -26,6 +28,7 @@ public class RolePolicyRegister implements JSecurityRegister {
 	@Override
 	public void register() {
 		if (Objects.nonNull(rolePolicies)) {
+			log.info("-- Role Policies --");
 			for (AbstractRolePolicyConfiguration policy : rolePolicies) {
 				RolePolicyRepresentation representation = new RolePolicyRepresentation();
 				policy.configure(representation);

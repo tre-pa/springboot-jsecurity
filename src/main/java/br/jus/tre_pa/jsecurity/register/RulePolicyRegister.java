@@ -10,8 +10,10 @@ import org.springframework.stereotype.Component;
 import br.jus.tre_pa.jsecurity.AbstractRulePolicyConfiguration;
 import br.jus.tre_pa.jsecurity.JSecurityRegister;
 import br.jus.tre_pa.jsecurity.service.SecurityService;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class RulePolicyRegister implements JSecurityRegister {
 
 	@Autowired
@@ -26,6 +28,7 @@ public class RulePolicyRegister implements JSecurityRegister {
 	@Override
 	public void register() {
 		if (Objects.nonNull(rulePolicies)) {
+			log.info("-- Rule Policies --");
 			for (AbstractRulePolicyConfiguration policy : rulePolicies) {
 				RulePolicyRepresentation representation = new RulePolicyRepresentation();
 				policy.configure(representation);
