@@ -1,8 +1,11 @@
 package br.jus.tre_pa.jsecurity.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
+import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ClientRegister implements JSecurityRegister {
 
 	@Autowired
+	private Keycloak keycloak;
+
+	@Autowired
 	private SecurityService securityService;
 
 	/**
@@ -41,22 +47,24 @@ public class ClientRegister implements JSecurityRegister {
 				ClientRepresentation representation = new ClientRepresentation();
 				clientConf.configure(representation);
 				if (securityService.register(representation)) {
-					if (Objects.nonNull(clientConf.roles())) addRoles(clientConf);
+					if (Objects.nonNull(clientConf.roles())) addRoles(clientConf, representation.getClientId());
 					// Registra o fronted
 					if (Objects.nonNull(clientConf.frontend())) {
 						securityService.register(clientConf.frontend());
+						List<String> roles = new ArrayList<>();
+						// TODO Adcionar o ScopeMapping
 					}
 				}
 			}
 		}
 	}
 
-	private void addRoles(AbstractClientConfiguration clientConf) {
+	private void addRoles(AbstractClientConfiguration clientConf, String clientId) {
 		// @formatter:off
 		clientConf.roles().stream()
 			.filter(role -> !StringUtils.isEmpty(role))
 			.map(role -> new RoleRepresentation(role, role, false))
-			.forEach(role -> securityService.getClientResource().roles().create(role));
+			.forEach(role -> securityService.getClientResource(clientId).roles().create(role));
 		// @formatter:on
 	}
 

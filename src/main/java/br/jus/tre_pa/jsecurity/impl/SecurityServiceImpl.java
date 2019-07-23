@@ -201,13 +201,22 @@ public class SecurityServiceImpl implements SecurityService {
 		return false;
 	}
 
-	@Override
-	public ClientResource getClientResource() {
+	private ClientResource getClientResource() {
 		// @formatter:off
 		return  keycloak.realm(kcProperties.getRealm()).clients().findByClientId(kcProperties.getClientId()).stream()
 				.map(client-> keycloak.realm(kcProperties.getRealm()).clients().get(client.getId()))
 				.findFirst()
 				.orElseThrow(() -> new IllegalArgumentException(String.format("Erro ao encontrar client '%s'", kcProperties.getClientId() )));
+		// @formatter:on
+	}
+
+	@Override
+	public ClientResource getClientResource(String clientId) {
+		// @formatter:off
+		return  keycloak.realm(kcProperties.getRealm()).clients().findByClientId(clientId).stream()
+				.map(client-> keycloak.realm(kcProperties.getRealm()).clients().get(client.getId()))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException(String.format("Erro ao encontrar client '%s'", clientId )));
 		// @formatter:on
 	}
 

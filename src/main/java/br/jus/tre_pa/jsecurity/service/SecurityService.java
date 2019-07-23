@@ -121,5 +121,5 @@ public interface SecurityService {
 	 * 
 	 * @return
 	 */
-	ClientResource getClientResource();
+	ClientResource getClientResource(String clientId);
 }
