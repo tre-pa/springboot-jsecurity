@@ -60,7 +60,6 @@ public class SecurityServiceImpl implements SecurityService {
 					.findAny()
 					.ifPresent(p -> getClientResource().authorization().resources().resource(p.getId()).remove());
 				// @formatter:on
-
 				// Remove a policy default gerada com o client. @formatter:off
 				getClientResource().authorization().policies().policies().stream()
 					.filter(p -> p.getName().equals("Default Policy"))

@@ -41,17 +41,23 @@ public class ClientRegister implements JSecurityRegister {
 				ClientRepresentation representation = new ClientRepresentation();
 				clientConf.configure(representation);
 				if (securityService.register(representation)) {
-					if (Objects.nonNull(clientConf.roles())) {
-					// @formatter:off
-					clientConf.roles().stream()
-						.filter(role -> !StringUtils.isEmpty(role))
-						.map(role -> new RoleRepresentation(role, role, false))
-						.forEach(role -> securityService.getClientResource().roles().create(role));
-					// @formatter:on
+					if (Objects.nonNull(clientConf.roles())) addRoles(clientConf);
+					// Registra o fronted
+					if (Objects.nonNull(clientConf.frontend())) {
+						securityService.register(clientConf.frontend());
 					}
 				}
 			}
 		}
+	}
+
+	private void addRoles(AbstractClientConfiguration clientConf) {
+		// @formatter:off
+		clientConf.roles().stream()
+			.filter(role -> !StringUtils.isEmpty(role))
+			.map(role -> new RoleRepresentation(role, role, false))
+			.forEach(role -> securityService.getClientResource().roles().create(role));
+		// @formatter:on
 	}
 
 }

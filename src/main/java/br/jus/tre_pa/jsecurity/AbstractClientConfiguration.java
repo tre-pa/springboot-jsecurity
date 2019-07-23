@@ -23,4 +23,9 @@ public abstract class AbstractClientConfiguration extends AbstractArtifactConfig
 	public List<String> roles() {
 		return null;
 	}
+
+	public ClientRepresentation frontend() {
+		return null;
+	}
+
 }
