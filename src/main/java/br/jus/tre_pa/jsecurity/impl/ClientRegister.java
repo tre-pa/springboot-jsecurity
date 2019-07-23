@@ -1,11 +1,14 @@
 package br.jus.tre_pa.jsecurity.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,12 +54,26 @@ public class ClientRegister implements JSecurityRegister {
 					// Registra o fronted
 					if (Objects.nonNull(clientConf.frontend())) {
 						securityService.register(clientConf.frontend());
-						List<String> roles = new ArrayList<>();
-						// TODO Adcionar o ScopeMapping
+						setupScopeMappings(clientConf, representation);
 					}
 				}
 			}
 		}
+	}
+
+	private void setupScopeMappings(AbstractClientConfiguration clientConf, ClientRepresentation representation) {
+		List<String> roles = new ArrayList<>();
+		if (Objects.nonNull(representation.getDefaultRoles())) roles.addAll(Arrays.asList(representation.getDefaultRoles()));
+		if (Objects.nonNull(clientConf.roles())) roles.addAll(clientConf.roles());
+		ClientResource frontendClientResource = securityService.getClientResource(clientConf.frontend().getClientId());
+		ClientResource backendClientResource = securityService.getClientResource(representation.getClientId());
+		// @formatter:off
+		frontendClientResource.getScopeMappings().clientLevel(backendClientResource.toRepresentation().getId())
+			.add(roles
+					.stream()
+					.map(role -> new RoleRepresentation(role, role, false))
+					.collect(Collectors.toList()));
+		// @formatter:on
 	}
 
 	private void addRoles(AbstractClientConfiguration clientConf, String clientId) {
