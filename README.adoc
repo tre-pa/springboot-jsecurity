@@ -180,4 +180,35 @@ public class JReportPermission extends AbstractKcPermission {
 }
 ----
 
+=== Registrando um Usuário
 
+[source, java, linenums]
+----
+@Component
+@ConditionalOnProperty(value = "keycloak.auth-server-url", havingValue = "http://localhost:8085/auth", matchIfMissing = false)
+public class EstagiarioUser extends AbstractUserConfiguration {
+
+	private static final String PASSWORD = "1234";
+
+	@Override
+	public void configure(UserRepresentation representation) {
+		representation.setUsername("estag");
+		representation.setEmail("estagiario@tre-pa.jus.br");
+		representation.setEnabled(true);
+		CredentialRepresentation credential = new CredentialRepresentation();
+		credential.setType(CredentialRepresentation.PASSWORD);
+		credential.setValue(PASSWORD);
+		credential.setTemporary(false);
+		representation.setCredentials(Arrays.asList(credential));
+		// @formatter:off
+		representation.setClientRoles(
+				Collections.singletonMap(getKcProperties().getClientId(), 
+						Arrays.asList("USER")));
+		// @formatter:on
+	}
+
+}
+----
+
+NOTE: Caso o usuário já exista no keycloak, apenas as roles default da aplicação 
+serão atualizadas no mapeamento de roles do usuário.
