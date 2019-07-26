@@ -51,7 +51,7 @@ public class SecurityServiceImpl implements SecurityService {
 	public boolean register(ClientRepresentation representation) {
 		Assert.hasText(representation.getClientId(), String.format("O atributo 'clientId' do client (%s) deve ser definido.", representation.getClass().getName()));
 		if (!hasClient(representation.getClientId())) {
-			keycloak.realm(kcProperties.getRealm()).clients().create(representation);
+			keycloak.realm(kcProperties.getRealm()).clients().create(representation).close();
 			// Verifica se o recurso de authorization está habilitado para o client.
 			if (Objects.nonNull(representation.getAuthorizationServicesEnabled())) {
 				// Remove o resource default gerado com o client. @formatter:off
@@ -81,7 +81,7 @@ public class SecurityServiceImpl implements SecurityService {
 		Assert.notEmpty(representation.getScopes(), "O atributo 'scopes' do resource deve ser definido.");
 
 		if (!hasResource(representation.getName())) {
-			getClientResource().authorization().resources().create(representation);
+			getClientResource().authorization().resources().create(representation).close();
 			log.info("\t Resource '{}' registrado com sucesso.", representation.getName());
 			return true;
 		}
@@ -96,7 +96,7 @@ public class SecurityServiceImpl implements SecurityService {
 		Assert.notEmpty(representation.getClients(), "É necessário adicionar pelo menos 1 client a policy.");
 		// Verifica se o policy existe
 		if (!hasClient(representation.getName())) {
-			getClientResource().authorization().policies().client().create(representation);
+			getClientResource().authorization().policies().client().create(representation).close();
 			log.info("\t Client Policy '{}' registrado com sucesso.", representation.getName());
 			return true;
 		}
@@ -109,7 +109,7 @@ public class SecurityServiceImpl implements SecurityService {
 		Assert.hasText(representation.getName(), "O atributo 'name' da RolePolicy é obrigatório.");
 		// Verifica se o role existe ou no client ou no realm.
 		if (hasClientRole(representation.getName()) || hasRealmRole(representation.getName())) {
-			getClientResource().authorization().policies().role().create(representation);
+			getClientResource().authorization().policies().role().create(representation).close();
 			log.info("\t Role Policy '{}' registrada com sucesso.", representation.getName());
 			return true;
 		}
@@ -122,7 +122,7 @@ public class SecurityServiceImpl implements SecurityService {
 		Assert.hasLength(representation.getName(), "O atributo 'name' da GrupoPolicy é obrigatório.");
 		Assert.notEmpty(representation.getGroups(), String.format("É necessário atribuir pelo menos 1 group a GroupPolicy '%s'.", representation.getName()));
 
-		getClientResource().authorization().policies().group().create(representation);
+		getClientResource().authorization().policies().group().create(representation).close();
 		log.info("\t Group Policy '{}' registrado com sucesso.", representation.getName());
 		return true;
 	}
@@ -132,7 +132,7 @@ public class SecurityServiceImpl implements SecurityService {
 		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na JSPolicy.");
 		Assert.hasText(representation.getCode(), String.format("O atributo 'code' é obrigatório na JSPolicy '%s'.", representation.getName()));
 
-		getClientResource().authorization().policies().js().create(representation);
+		getClientResource().authorization().policies().js().create(representation).close();
 		log.info("\t Js Policy '{}' registrado com sucesso.", representation.getName());
 		return true;
 	}
@@ -141,7 +141,7 @@ public class SecurityServiceImpl implements SecurityService {
 	public boolean register(RulePolicyRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na RulePolicy.");
 
-		getClientResource().authorization().policies().rule().create(representation);
+		getClientResource().authorization().policies().rule().create(representation).close();
 		log.info("\t Rule Policy '{}' registrado com sucesso.", representation.getName());
 		return true;
 	}
@@ -150,7 +150,7 @@ public class SecurityServiceImpl implements SecurityService {
 	public boolean register(TimePolicyRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na TimePolicy.");
 
-		getClientResource().authorization().policies().time().create(representation);
+		getClientResource().authorization().policies().time().create(representation).close();
 		log.info("\t Time Policy '{}' registrado com sucesso.", representation.getName());
 		return true;
 	}
@@ -158,7 +158,7 @@ public class SecurityServiceImpl implements SecurityService {
 	@Override
 	public boolean register(UserPolicyRepresentation representation) {
 		Assert.hasText(representation.getName(), "O atributo 'name' é obrigatório na UserPolicy.");
-		getClientResource().authorization().policies().user().create(representation);
+		getClientResource().authorization().policies().user().create(representation).close();
 		log.info("\t User Policy '{}' registrado com sucesso.", representation.getName());
 		return true;
 	}
@@ -168,7 +168,7 @@ public class SecurityServiceImpl implements SecurityService {
 		Assert.hasText(representation.getName(), "O atributo 'name' da aggregate policy deve ser definido.");
 		Assert.notEmpty(representation.getPolicies(), "o atributo 'policies' da agregate policy deve ser definido.");
 
-		getClientResource().authorization().policies().aggregate().create(representation);
+		getClientResource().authorization().policies().aggregate().create(representation).close();
 		log.info("Aggregate Policy '{}' registrada com sucesso.", representation.getName());
 		return true;
 	}
@@ -180,7 +180,7 @@ public class SecurityServiceImpl implements SecurityService {
 	 */
 	@Override
 	public boolean register(ResourcePermissionRepresentation representation) {
-		getClientResource().authorization().permissions().resource().create(representation);
+		getClientResource().authorization().permissions().resource().create(representation).close();
 		log.info("\t Permission '{}' registrado com sucesso.", representation.getName());
 		return true;
 	}
@@ -193,7 +193,7 @@ public class SecurityServiceImpl implements SecurityService {
 		Assert.hasText(representation.getUsername(), "O atributo 'username' é obrigatório.");
 		Assert.hasText(representation.getEmail(), "O atributo 'email' é obrigatório.");
 		if (!hasUser(representation.getUsername())) {
-			keycloak.realm(kcProperties.getRealm()).users().create(representation);
+			keycloak.realm(kcProperties.getRealm()).users().create(representation).close();
 			log.info("\t Usuário '{}' registrado com sucesso.", representation.getUsername());
 			return true;
 		}
