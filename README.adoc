@@ -79,7 +79,7 @@ public class BackendClient extends AbstractClientConfiguration {
 
 	@Override
 	public List<String> roles() {
-		return Arrays.asList("REPORT_MNGT"); #<1>
+		return Arrays.asList("REPORT_MNGT"); # <1>
 	}
 
 	@Override
