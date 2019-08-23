@@ -3,7 +3,6 @@
 :toc-title: Índice
 :sectnums:
 :source-highlighter: coderay
-:pygments-linenums-mode: inline
 
 O projeto `springboot-jsecurity` tem como objetivo:
 
