@@ -57,7 +57,7 @@ public class AppRealm extends AbstractKcRealm {
 ----
 
 === Registrando um Client
-
+<1>
 [source, java, linenums ]
 ----
 @Component
