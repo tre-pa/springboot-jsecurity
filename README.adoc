@@ -3,6 +3,7 @@
 :toc-title: Índice
 :sectnums:
 :source-highlighter: coderay
+:coderay-linenums-mode: inline
 
 O projeto `springboot-jsecurity` tem como objetivo:
 
@@ -58,7 +59,7 @@ public class AppRealm extends AbstractKcRealm {
 
 === Registrando um Client
 
-[source, java, linenums=implicit]
+[source, java, linenums]
 ----
 @Component
 public class BackendClient extends AbstractClientConfiguration {
