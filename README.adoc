@@ -57,9 +57,9 @@ public class AppRealm extends AbstractKcRealm {
 ----
 
 === Registrando um Client
+<1> configuracao para registrar uma role
 
 [source, java, linenums]
-<1> -> configuracao para registrar uma role
 ----
 @Component
 public class BackendClient extends AbstractClientConfiguration {
