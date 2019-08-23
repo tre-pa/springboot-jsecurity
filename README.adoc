@@ -60,6 +60,9 @@ public class AppRealm extends AbstractKcRealm {
 
 [source, java, numbered]
 ----
+include::res/test.java
+----
+----
 @Component
 public class BackendClient extends AbstractClientConfiguration {
 
