@@ -58,7 +58,7 @@ public class AppRealm extends AbstractKcRealm {
 
 === Registrando um Client
 
-[source, java, linenums, ruby]
+[source, java, linenums]
 ----
 @Component
 public class BackendClient extends AbstractClientConfiguration {
@@ -79,7 +79,7 @@ public class BackendClient extends AbstractClientConfiguration {
 
 	@Override
 	public List<String> roles() {
-		return Arrays.asList("REPORT_MNGT"); # <1>
+		return Arrays.asList("REPORT_MNGT"); // <1>
 	}
 
 	@Override
